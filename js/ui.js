@@ -3,7 +3,7 @@ import { APP_VERSION, CAUSALI, SLOT, SLOT_COLOR, GRADI, GRADO_ORDER, AUTISTA, SP
 import * as store from "./store.js";
 import * as sync from "./sync.js";
 import * as lock from "./lock.js";
-import { turniAnno, attivoIn, rpEffettivo, valoreCella, presente, effettiviTurno, isoToIt, todayIso, cellKey } from "./engine.js";
+import { turniAnno, attivoIn, rpEffettivo, valoreCella, presente, presenteSede, effettiviTurno, isoToIt, todayIso, cellKey } from "./engine.js";
 
 const $ = (sel) => document.querySelector(sel);
 const anno = () => store.getState().settings.anno;
@@ -24,6 +24,18 @@ export function init() {
   $("#btn-home").addEventListener("click", () => { location.hash = "#"; });
   $("#btn-export").addEventListener("click", esporta);
   $("#btn-cancella-persona").onclick = apriCancellaPersona;
+  $("#btn-import").addEventListener("click", () => $("#file-import").click());
+  $("#file-import").addEventListener("change", importa);
+  $("#btn-cambia-pass").onclick = async () => {
+    const vecchia = prompt("Password attuale:");
+    if (vecchia === null) return;
+    const nuova = prompt("Nuova password (minimo 4 caratteri):");
+    if (nuova === null) return;
+    try {
+      await lock.cambiaPassword(vecchia, nuova);
+      alert("Password aggiornata.");
+    } catch (e) { alert(e.message); }
+  };
   $("#btn-cambio-rp").onclick = apriCambioRp;
   $("#btn-ordina").onclick = () => {
     renderHome();
@@ -216,7 +228,8 @@ function apriPersona(id) {
     chiudiModale();
     renderHome();
   };
-  if (id) $("#fp-elimina").onclick = () => {
+  if (id) $("#fp-elimina").onclick = async () => {
+    if (!(await chiediPassword("Per cancellare una persona serve la password di accesso."))) return;
     if (confirm("Eliminare definitivamente questa persona e tutte le sue presenze?")) {
       store.deletePerson(id);
       chiudiModale();
@@ -266,6 +279,15 @@ function apriStorico(id) {
 
 function chiudiModale() { $("#modale").style.display = "none"; }
 
+// chiede la password di accesso per le operazioni delicate (es. cancellazione personale)
+async function chiediPassword(messaggio) {
+  const pw = prompt(messaggio);
+  if (pw === null) return false;
+  const ok = await lock.verificaPassword(pw);
+  if (!ok) alert("Password errata: operazione annullata.");
+  return ok;
+}
+
 function apriCancellaPersona() {
   const s = store.getState();
   const persone = ordinaPersone(s.personale);
@@ -282,10 +304,11 @@ function apriCancellaPersona() {
     </div>`;
   $("#modale").style.display = "flex";
   $("#fp-annulla").onclick = chiudiModale;
-  $("#canc-ok").onclick = () => {
+  $("#canc-ok").onclick = async () => {
     const id = $("#canc-pers").value;
     const p = s.personale.find(x => x.id === id);
     if (!p) return;
+    if (!(await chiediPassword("Per cancellare una persona serve la password di accesso."))) return;
     if (confirm(`Confermi la cancellazione di ${p.cognome} ${p.nome}? L'operazione elimina anche tutte le sue presenze e non si puo' annullare.`)) {
       store.deletePerson(id);
       chiudiModale();
@@ -457,6 +480,34 @@ function renderPresenze() {
     }
   }
   html += `<td class="tot" colspan="7"></td></tr>`;
+  // righe di dettaglio per turno: licenze, rinforzi, riposi, autisti e abilitazioni
+  const righeConteggio = [
+    ["LICENZE (L)", (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "L"],
+    ["RINFORZI (R)", (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "R"],
+    ["IN RP (riposo)", (p, t) => {
+      const c = cmap[cellKey(p.id, t.date)] || "";
+      return c === "" && rpEffettivo(s, p.id, t.date) === t.slot;
+    }],
+    ["AUTISTI", (p, t) => !!p.autista && presenteSede(s, p, t, cmap)],
+    ["AS presenti", (p, t) => p.spec?.AS === "Si" && presenteSede(s, p, t, cmap)],
+    ["AG presenti", (p, t) => p.spec?.AG === "Si" && presenteSede(s, p, t, cmap)],
+    ["SO115 presenti", (p, t) => p.spec?.SO115 === "Si" && presenteSede(s, p, t, cmap)],
+  ];
+  for (const [etichetta, filtro] of righeConteggio) {
+    html += `<tr class="effettivi"><td class="stick1" colspan="3">${etichetta}</td>`;
+    for (const g of mesi) {
+      html += `<td class="rpmese"></td>`;
+      for (const t of g.turni) {
+        let n = 0;
+        for (const p of persone) {
+          if (!attivoIn(p, t.date)) continue;
+          if (filtro(p, t)) n++;
+        }
+        html += `<td class="num">${n}</td>`;
+      }
+    }
+    html += `<td class="tot" colspan="7"></td></tr>`;
+  }
   html += "</tbody>";
   tb.innerHTML = html;
 
