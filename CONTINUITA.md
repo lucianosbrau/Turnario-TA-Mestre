@@ -84,7 +84,7 @@ causale il banner delle criticità si aggiorna (vedi sotto).
 10. SO115 presenti — **spunta SO115 in anagrafica** (NON la causale SO) + `presenteSede`; critico se < 5
 
 **Evidenza criticità**: cella rossa (`td.num.critico`); banner unico
-chiudibile con "x" che elenca **tutte** le criticità future di date
+chiudibile con "x" che elenca **tutte** le criticità future con data
 successiva ad oggi, ma **compare solo dopo l'inserimento di una causale**
 (`avvisoDaCausale`), non all'apertura della pagina. Chiuso non ricompare
 finché non si inserisce un'altra causale. Non persiste tra sessioni (nota
