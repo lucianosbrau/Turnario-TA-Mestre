@@ -197,7 +197,10 @@ function apriPersona(id) {
       <label>Nome<input name="nome" value="${p.nome}" required></label>
       <label>Grado<select name="grado">${GRADI.map(g => `<option ${g === p.grado ? "selected" : ""}>${g}</option>`).join("")}</select></label>
       <label>RP base (salto turno)<select name="rp">${SLOT.map(a => `<option ${a === p.rp ? "selected" : ""}>${a}</option>`).join("")}</select></label>
-      <label>Capo turno<input name="capoTurno" value="${p.capoTurno || ""}" placeholder="Si/No"></label>
+      <label>Capo turno<select name="capoTurno">
+        <option value="No" ${!p.capoTurno || p.capoTurno === "No" ? "selected" : ""}>No</option>
+        <option value="Si" ${p.capoTurno === "Si" ? "selected" : ""}>Si</option>
+      </select></label>
       <label>Autista<select name="autista"><option value=""></option>${AUTISTA.map(a => `<option ${a === p.autista ? "selected" : ""}>${a}</option>`).join("")}</select></label>
       <label>Dal (entratə nel turno)<input type="date" name="dal" value="${p.dal || ""}"></label>
       <label>Al (uscitə dal turno — lascia vuoto se in servizio)<input type="date" name="al" value="${p.al || ""}"></label>
@@ -217,7 +220,7 @@ function apriPersona(id) {
       nome: f.querySelector('[name="nome"]').value.trim(),
       grado: f.querySelector('[name="grado"]').value,
       rp: f.querySelector('[name="rp"]').value,
-      capoTurno: f.querySelector('[name="capoTurno"]').value.trim(),
+      capoTurno: f.querySelector('[name="capoTurno"]').value,
       autista: f.querySelector('[name="autista"]').value,
       dal: f.querySelector('[name="dal"]').value || null,
       al: f.querySelector('[name="al"]').value || null,
