@@ -6,6 +6,9 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 const CRED_KEY = "turnario-ta-sync-cred";      // email+password salvate nel dispositivo
 const SESSION_KEY = "turnario-ta-sync-token"; // token di sessione
+const CODE_KEY = "turnario-ta-sync-code";     // codice del link privato (?k=...)
+
+let codiceLink = null;
 
 let session = null;    // { access_token, user_id, expires_at }
 let cred = null;       // { email, password }
@@ -42,8 +45,23 @@ export function disconnetti() {
   cred = null; session = null;
   localStorage.removeItem(CRED_KEY);
   localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(CODE_KEY);
+  codiceLink = null;
   status("spenta");
 }
+
+// modalita' LINK: legge il codice dall'indirizzo (?k=...) e lo memorizza nel dispositivo
+export function leggiCodiceDaUrl() {
+  if (typeof location === "undefined") return !!localStorage.getItem(CODE_KEY);
+  const p = new URLSearchParams(location.search).get("k");
+  if (p && p.trim().length >= 20) {
+    localStorage.setItem(CODE_KEY, p.trim());
+  }
+  codiceLink = localStorage.getItem(CODE_KEY);
+  return !!codiceLink;
+}
+
+export function codiceAttivo() { return !!codiceLink; }
 
 let ultimoRetry401 = 0;
 async function api(path, opts = {}, retry = true) {
@@ -88,6 +106,16 @@ export async function login() {
 
 // scarica l'archivio del turno (se esiste) -> { stato, aggiornato_al } | null
 export async function scarica() {
+  if (codiceLink) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/turnario_leggi`, {
+      method: "POST",
+      headers: { "apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_codice: codiceLink }),
+    });
+    if (!res.ok) { status("errore", "Lettura online non riuscita (codice o script SQL?)."); return null; }
+    const j = await res.json();
+    return j && j.stato ? j : null;
+  }
   const res = await api(`/rest/v1/turnario_archivio?select=stato,aggiornato_al&limit=1`);
   if (!res.ok) return null;
   const rows = await res.json();
@@ -96,6 +124,17 @@ export async function scarica() {
 
 // salva (o aggiorna) l'archivio del turno
 export async function salva(statoObj) {
+  if (codiceLink) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/turnario_scrivi`, {
+      method: "POST",
+      headers: { "apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_codice: codiceLink, p_stato: statoObj }),
+    });
+    const j = await res.json().catch(() => null);
+    if (res.ok && j === true) { ultimoPush = new Date().toISOString(); status("sincronizzato"); return true; }
+    status("errore", "Salvataggio online non riuscito (codice non valido o script SQL da eseguire).");
+    return false;
+  }
   if (!session) return false;
   const res = await api(
     `/rest/v1/turnario_archivio?on_conflict=user_id`,
@@ -123,7 +162,7 @@ export function programmaPush(runLocalmente, leggiStato) {
     if (inCorsa) { programmaPush(runLocalmente, leggiStato); return; }
     inCorsa = true;
     try {
-      if (!session) {
+      if (!codiceLink && !session) {
         const ok = await login();
         if (!ok) { inCorsa = false; return; }
       }
@@ -135,12 +174,26 @@ export function programmaPush(runLocalmente, leggiStato) {
 // all'avvio: scarica e, se il cloud e' piu' recente, applicalo
 export async function avvio(applicaStato, statoLocale) {
   if (!attivo()) { status("spenta"); return; }
+  if (!codiceLink) leggiCodiceDaUrl();
+  if (codiceLink) {
+    status("in-attesa");
+    const rem = await scarica();
+    if (!rem || !rem.stato || !rem.stato.personale) { await salva(statoLocale()); return; }
+    const locale = statoLocale();
+    const tLocale = (locale && locale.__aggiornatoAl) || "";
+    const tRemoto = (rem.aggiornato_al + "").slice(0, 23);
+    if (!tLocale || tRemoto > tLocale.slice(0, 23)) {
+      applicaStato(rem.stato);
+      status("sincronizzato", "Archivio aggiornato dal cloud.");
+    } else status("sincronizzato");
+    return;
+  }
   if (!credenzialiSalvate()) { status("senza-credenziali"); return; }
   status("in-attesa");
   if (!session && !(await login())) return;
   const rem = await scarica();
-  if (!rem) {
-    // nessun archivio online: pubble quello locale
+  if (!rem || !rem.stato || !rem.stato.personale) {
+    // nessun archivio online (o riga ancora vuota): pubble quello locale
     await salva(statoLocale());
     return;
   }

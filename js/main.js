@@ -1,5 +1,6 @@
 import * as ui from "./ui.js";
 import * as lock from "./lock.js";
+import * as sync from "./sync.js";
 
 async function gestisciAccesso() {
   const box = document.getElementById("blocco");
@@ -37,6 +38,9 @@ async function gestisciAccesso() {
     if (e.key === "Enter") form.querySelector("#blocco-ok").click();
   });
 }
+
+// il codice del link privato (?k=...) viene catturato prima di avviare l'app
+sync.leggiCodiceDaUrl();
 
 // l'app resta ferma dietro la schermata di blocco finche' la password non e' data
 gestisciAccesso().then(() => {

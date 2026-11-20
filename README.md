@@ -59,6 +59,17 @@ gestire: l'archivio viene salvato online in automatico a ogni modifica e
 scaricato all'apertura. Se la rete manca, l'app funziona lo stesso e si
 risincronizza appena torna.
 
+### Modalita' A — link privato (la piu' semplice)
+
+Si sincronizza semplicemente aprendo l'app con l'indirizzo completo del link
+privato, salvato nei preferiti: `...Turnario-TA-Mestre/?k=CODICE`.
+Il codice viene memorizzato dal dispositivo: dalle volte successive non serve
+piu' nemmeno il `?k=...`. Chi ha il link legge/scrive l'archivio di sede; per
+revocare l'accesso si rigenera il codice con `turnario_cambia_codice` e si
+ridistribuisce il link.
+
+### Modalita' B — account del turno
+
 ### Attivazione (una volta sola, chi gestisce il progetto)
 1. Nel pannello del proprio account Supabase, in **SQL Editor**, eseguire:
 
@@ -85,6 +96,51 @@ create policy "solo proprietario aggiorna" on turnario_archivio
 Dopo la pubblicazione, su ogni dispositivo: pagina principale →
 **"Attiva la sincronizzazione"** → email e password del turno, una volta
 sola. Lo stato della sincronizzazione e' sempre visibile in alto.
+
+### Script SQL per il link privato (Modalita' A)
+
+```sql
+create table if not exists turnario_link_privato (
+  id int primary key default 1,
+  codice text not null unique,
+  stato jsonb not null default '{}'::jsonb,
+  aggiornato_al timestamptz not null default now()
+);
+insert into turnario_link_privato (id, codice) values (1, 'CODICE-SEGRETO-GENERATO')
+  on conflict (id) do update set codice = excluded.codice;
+alter table turnario_link_privato enable row level security;
+revoke all on turnario_link_privato from anon, authenticated;
+
+create or replace function turnario_leggi(p_codice text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare r record;
+begin
+  select stato, aggiornato_al into r from turnario_link_privato where codice = p_codice;
+  if not found then return null; end if;
+  return jsonb_build_object('stato', r.stato, 'aggiornato_al', r.aggiornato_al);
+end $$;
+
+create or replace function turnario_scrivi(p_codice text, p_stato jsonb)
+returns boolean language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from turnario_link_privato where codice = p_codice) then
+    return false;
+  end if;
+  update turnario_link_privato set stato = p_stato, aggiornato_al = now() where codice = p_codice;
+  return true;
+end $$;
+
+create or replace function turnario_cambia_codice(p_vecchio text, p_nuovo text)
+returns boolean language plpgsql security definer set search_path = public as $$
+begin
+  update turnario_link_privato set codice = p_nuovo where codice = p_vecchio;
+  return found;
+end $$;
+```
+
+Il `CODICE-SEGRETO-GENERATO` viene generato alla consegna; per rigenerarlo:
+SQL Editor -> `select turnario_cambia_codice('vecchio', 'nuovo');` e si
+distribuisce il nuovo link (tutti i vecchi link smettono di funzionare).
 
 Chiave di volta: se due dispositivi compilano **contemporaneamente**, vince
 l'ultima modifica; l'app conserva comunque uno snapshot prima di applicare
