@@ -224,11 +224,30 @@ function apriPersona(id) {
     let cognome = f.querySelector('[name="cognome"]').value.trim();
     let nome = f.querySelector('[name="nome"]').value.trim();
     if (!cognome || !nome) { alert("Cognome e nome sono obbligatori."); return; }
-    // se cognome+nome esiste gia' in archivio, chiede di rinominare la nuova persona
+    // se cognome+nome esiste gia' in archivio: se e' uscita dal turno offre di
+    // recuperarla (riattivandola), altrimenti chiede di rinominare la nuova persona
     const esisteGia = (c, n) => store.getState().personale.some(p =>
       p.id !== id && (p.cognome || "").trim().toLowerCase() === c.toLowerCase() &&
       (p.nome || "").trim().toLowerCase() === n.toLowerCase());
     if (esisteGia(cognome, nome)) {
+      const doppioni = store.getState().personale.filter(p =>
+        p.id !== id && (p.cognome || "").trim().toLowerCase() === cognome.toLowerCase() &&
+        (p.nome || "").trim().toLowerCase() === nome.toLowerCase());
+      const usciti = doppioni.filter(p => !attivoIn(p, todayIso()));
+      const attivi = doppioni.filter(p => attivoIn(p, todayIso()));
+      if (usciti.length && !attivi.length) {
+        const u = usciti[0];
+        const rec = confirm(`Attenzione: in archivio c'è già ${cognome} ${nome}, uscita dal turno${u.al ? " il " + isoToIt(u.al) : ""}.
+Vuoi recuperarla e renderla di nuovo in servizio? (Il suo storico di presenze resta intatto; con "Annulla" puoi invece inserirla con un nome differente.)`);
+        if (rec) {
+          u.al = null;
+          store.save();
+          chiudiModale();
+          renderHome();
+          alert(`${cognome} ${nome} è stata recuperata e ora è di nuovo in servizio.`);
+          return;
+        }
+      }
       const vuoi = confirm(`Attenzione: in archivio esiste già una persona che si chiama ${cognome} ${nome}.
 Se intendi inserire comunque questa persona, devi nominarla in modo differente. Vuoi continuare?`);
       if (!vuoi) return;
