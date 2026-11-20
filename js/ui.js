@@ -79,6 +79,17 @@ function aggiornaPannelloSync() {
       Fino ad allora l'app funziona solo in locale, con backup tramite Esporta/Importa.</p>`;
     return;
   }
+  if (sync.codiceAttivo()) {
+    box.innerHTML = `<p class="aiuto">Sincronizzazione attiva tramite <b>link privato</b>: ogni modifica viene
+      salvata online in automatico e ritrovata da qualunque dispositivo che apre il link.
+      <button id="sync-disconnetti" class="distruttivo">Disconnetti questo dispositivo</button></p>`;
+    $("#sync-disconnetti").onclick = () => {
+      sync.disconnetti();
+      aggiornaPannelloSync();
+      mostraStatoSync("spenta");
+    };
+    return;
+  }
   if (sync.credenzialiSalvate()) {
     box.innerHTML = `<p class="aiuto">Sincronizzazione attiva: ogni modifica viene salvata online in automatico
       e ritrovata da qualunque dispositivo con le credenziali del turno.
@@ -90,8 +101,10 @@ function aggiornaPannelloSync() {
     };
   } else {
     box.innerHTML = `
-      <p class="aiuto">Attiva la sincronizzazione su questo dispositivo con l'account del turno
-        (email e password scelti quando e' stato creato). Si inserisce una volta sola.</p>
+      <p class="aiuto">Due modi per attivare la sincronizzazione su questo dispositivo:
+        <br><b>1) Link privato</b>, il piu' semplice: apri l'app con l'indirizzo che contiene il codice
+        (quello salvato nei preferiti) e la sincronizzazione parte da sola.
+        <br><b>2) Account del turno</b> qui sotto (email e password, una volta sola):</p>
       <div class="form-sync">
         <label>Email <input type="email" id="sync-email" placeholder="turnario@..."></label>
         <label>Password <input type="password" id="sync-pass"></label>
