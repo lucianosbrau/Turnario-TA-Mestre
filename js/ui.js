@@ -508,7 +508,7 @@ function renderPresenze() {
       filtro: (p, t) => (p.autista === "3°" || p.autista === "4°") && presenteSede(s, p, t, cmap),
       critico: (n) => n < 5, motivo: "autisti presenti sotto 5" },
     { etichetta: "CAPI",
-      filtro: (p, t) => GRADI_CAPI.includes(p.grado) && presente(s, p, t, cmap),
+      filtro: (p, t) => GRADI_CAPI.includes(p.grado) && presenteSede(s, p, t, cmap),
       critico: (n) => n < 3, motivo: "capi in turno sotto 3" },
     { etichetta: "AS presenti", filtro: (p, t) => p.spec?.AS === "Si" && presenteSede(s, p, t, cmap) },
     { etichetta: "AG presenti", filtro: (p, t) => p.spec?.AG === "Si" && presenteSede(s, p, t, cmap) },
@@ -538,7 +538,8 @@ function renderPresenze() {
   }
   html += "</tbody>";
   // avviso delle criticita' future (dopo oggi), chiudibile con la x
-  aggiornaAvvisoCriticita(criticita, a);
+  criticitaStato = criticita;
+  aggiornaAvvisoCriticita(a);
   tb.innerHTML = html;
 
   // interazione celle
@@ -558,28 +559,32 @@ function renderPresenze() {
   }));
 }
 
-let avvisoChiuso = false;   // si riapre al prossimo avvio dell'app
-function aggiornaAvvisoCriticita(criticita, annoSel) {
+let avvisoChiuso = false;          // chiuso con la x dall'utente
+let avvisoDaCausale = false;       // il banner appare solo dopo l'inserimento di una causale
+let criticitaStato = {};           // data -> [motivi], ricalcolato a ogni render del lenzuolo
+
+function aggiornaAvvisoCriticita(annoSel) {
   const box = $("#avviso-criticita");
   if (!box) return;
-  if (avvisoChiuso) { box.style.display = "none"; return; }
+  const nascondi = () => { box.setAttribute("hidden", ""); box.style.display = "none"; };
+  if (avvisoChiuso || !avvisoDaCausale) { nascondi(); return; }
   const oggi = todayIso();
-  const future = Object.keys(criticita).filter(d => d > oggi).sort();
-  if (!future.length) { box.style.display = "none"; return; }
-  const lista = future.slice(0, 15).map(d => {
+  const future = Object.keys(criticitaStato).filter(d => d > oggi).sort();
+  if (!future.length) { nascondi(); return; }
+  const lista = future.map(d => {
     const [aaa, mm, gg] = d.split("-");
-    return `<li><b>${gg}/${mm}/${aaa}</b> — ${criticita[d].join("; ")}</li>`;
+    return `<li><b>${gg}/${mm}/${aaa}</b> — ${criticitaStato[d].join("; ")}</li>`;
   }).join("");
-  const altre = future.length > 15 ? `<p class="aiuto">…e altre ${future.length - 15} date.</p>` : "";
   box.innerHTML = `<div class="avviso-testo">
       <b>Attenzione — criticità future (${annoSel}):</b>
-      <ul>${lista}</ul>${altre}
+      <ul>${lista}</ul>
     </div>
     <button id="avviso-chiudi" title="Chiudi">×</button>`;
+  box.removeAttribute("hidden");
   box.style.display = "flex";
   $("#avviso-chiudi").onclick = () => {
     avvisoChiuso = true;
-    box.style.display = "none";
+    nascondi();
   };
 }
 
@@ -607,6 +612,7 @@ function menuCausale(anchor, pid, date) {
     if (!b) return;
     store.setCausale(anno(), pid, date, b.dataset.c);
     chiudiMenu();
+    avvisoDaCausale = true; avvisoChiuso = false;
     renderPresenze();
   });
 }
@@ -664,6 +670,7 @@ function menuNomeCausale(anchor, pid) {
     for (let i = i0; i < i0 + nTurni; i++) store.setCausale(a, pid, turni[i].date, codice);
     chiudiMenu();
     const fino = turni[i0 + nTurni - 1];
+    avvisoDaCausale = true; avvisoChiuso = false;
     alert(`Causale "${codice || "rimossa"}" su ${nTurni} turn${nTurni === 1 ? "o" : "i"}: da ${turni[i0].date} a ${fino.date}.`);
     renderPresenze();
   });

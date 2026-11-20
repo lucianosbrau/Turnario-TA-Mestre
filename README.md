@@ -46,13 +46,16 @@ Anno di partenza: **2027**.
     (celle vuote + SO + R, riposi e assenze esclusi), PERSONALE MESTRE
     (come sopra ma senza i rinforzi R), LICENZE, RINFORZI, IN RP,
     AUTISTI (solo chi in anagrafica ha 3° o 4°), CAPI (gradi CS, CSE,
-    CR, CRE), AS, AG, SO115 (conta chi ha la spunta SO115 in anagrafica,
+    CR, CRE; anche questa riga conta la presenza in sede, quindi senza
+    i rinforzi R), AS, AG, SO115 (conta chi ha la spunta SO115 in anagrafica,
     non la causale SO).
   - **Evidenza delle criticita'**: la cella del conteggio diventa rossa se
     le licenze superano il 27% del personale in turno di quel giorno, se gli
     autisti (3°/4°) scendono sotto 5, se i capi scendono sotto 3 o se gli
-    SO115 scendono sotto 5. Se la criticita' e' in una data futura, un avviso
-    in alto (chiudibile con la x) indica data e motivo.
+    SO115 scendono sotto 5. Il banner in alto (chiudibile con la x, unico per
+    tutte le date) elenca le criticita' future con data e motivo, ma compare
+    solo quando si inserisce una causale che genera criticita': non appare
+    all'apertura della pagina.
   - Ordine dei nominativi: per grado (CSE, CR, CRE, CS, VC, VE, VF) con il
     capo turno per primo, come nel foglio Excel; a parita' di grado resta
     l'ordine di inserimento.

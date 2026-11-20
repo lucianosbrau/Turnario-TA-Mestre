@@ -2,7 +2,7 @@
 // Strategia: NETWORK-FIRST su tutto. Quando c'e' rete usa sempre la versione
 // online (bypass totale della cache); la cache serve solo da fallback offline.
 // A ogni modifica importante: aggiornare CACHE qui sotto e la APP_VERSION in js/config.js.
-const CACHE = "turnario-ta-v0.10.0";
+const CACHE = "turnario-ta-v0.10.1";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
