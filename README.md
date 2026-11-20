@@ -47,7 +47,9 @@ Anno di partenza: **2027**.
     M (malattia), SO (sala operativa), R (rinforzo).
   - La colonna RP di ogni mese permette un cambio di salto turno
     **valido solo per quel mese** (eccezione, non tocca l'archivio).
-  - I nomi restano fissi mentre si scorre verso destra (colonne fisse).
+  - I nomi restano fissi mentre si scorre verso destra (colonne fisse);
+    le righe di testa del calendario (mesi, date, D/N, salto turno)
+    restano fisse durante lo scorrimento verso il basso.
   - Causali su piu' turni: clicca il NOME della persona, scegli la causale,
     la DATA DI INIZIO e QUANTI TURNI consecutivi (per un singolo giorno resta
     il clic sulla cella). Se la data indicata non e' un giorno di turno, la
@@ -57,13 +59,15 @@ Anno di partenza: **2027**.
     una persona supera le 8 licenze estive), SO e R.
   - Righe di conteggio in basso per ogni turno: PERSONALE IN TURNO
     (celle vuote + SO + R, riposi e assenze esclusi), PERSONALE MESTRE
-    (come sopra ma senza i rinforzi R), LICENZE, RINFORZI, IN RP,
+    (come sopra ma senza i rinforzi R), **ASSENZE TOTALI (RP + L)**
+    (riga gialla: riposi e licenze), LICENZE, RINFORZI, IN RP,
     AUTISTI (solo chi in anagrafica ha 3° o 4°), CAPI (gradi CS, CSE,
     CR, CRE; anche questa riga conta la presenza in sede, quindi senza
     i rinforzi R), AS, AG, SO115 (conta chi ha la spunta SO115 in anagrafica,
     non la causale SO).
   - **Evidenza delle criticita'**: la cella del conteggio diventa rossa se
-    le licenze superano il 27% del personale in turno di quel giorno, se gli
+    le **assenze totali (RP+L)** superano il 27% del personale in turno di
+    quel giorno (la riga delle sole licenze non genera alert), se gli
     autisti (3°/4°) scendono sotto 5, se i capi scendono sotto 3 o se gli
     SO115 scendono sotto 5. Il banner in alto (chiudibile con la x, unico per
     tutte le date) elenca le criticita' future con data e motivo, ma compare

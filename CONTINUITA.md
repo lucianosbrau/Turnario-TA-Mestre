@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.13.0. Ultima versione pubblicata: **0.13.0**.
+Data di riferimento: fine v0.13.1. Ultima versione pubblicata: **0.13.1**.
 
 ## 1. Contesto e obiettivo
 
@@ -77,14 +77,17 @@ banner delle criticità si aggiorna (vedi sotto).
 **Righe di conteggio in basso (per ogni turno)**:
 1. PERSONALE IN TURNO (`presente`: celle vuote + SO + R, riposi/assenze esclusi)
 2. PERSONALE MESTRE (come sopra ma senza R)
-3. LICENZE (L) — critico se `L > floor(0.27 × personale in turno)`
-4. RINFORZI (R)
-5. IN RP (celle vuote che coincidono con lo slot RP)
-6. **AUTISTI (3° e 4°)** — solo `p.autista ∈ {"3°","4°"}` E `presenteSede`; critico se < 5
-7. **CAPI** (gradi CS/CSE/CR/CRE) — `presenteSede` (decisione confermata dall'utente: conta chi è in sede, rinforzi esclusi); critico se < 3
-8. AS presenti — spec AS + `presenteSede`
-9. AG presenti — spec AG + `presenteSede`
-10. SO115 presenti — **spunta SO115 in anagrafica** (NON la causale SO) + `presenteSede`; critico se < 5
+3. **ASSENZE TOTALI (RP + L)** (v0.13.1, riga gialla, subito dopo PERSONALE
+   MESTRE) — critico se `> floor(0.27 × personale in turno)`; e' QUESTA
+   riga a generare l'alert del 27% (le sole licenze non lo generano piu')
+4. LICENZE (L) — nessun alert
+5. RINFORZI (R)
+6. IN RP (celle vuote che coincidono con lo slot RP)
+7. **AUTISTI (3° e 4°)** — solo `p.autista ∈ {"3°","4°"}` E `presenteSede`; critico se < 5
+8. **CAPI** (gradi CS/CSE/CR/CRE) — `presenteSede` (decisione confermata dall'utente: conta chi è in sede, rinforzi esclusi); critico se < 3
+9. AS presenti — spec AS + `presenteSede`
+10. AG presenti — spec AG + `presenteSede`
+11. SO115 presenti — **spunta SO115 in anagrafica** (NON la causale SO) + `presenteSede`; critico se < 5
 
 **Evidenza criticità**: cella rossa (`td.num.critico`); banner unico
 chiudibile con "x" che elenca **tutte** le criticità future con data
@@ -207,3 +210,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.12.2 | rimossa la riga "Personale in turno oggi" |
 | v0.12.3 | triangolo ▸ di evidenziazione riga nel lenzuolo |
 | v0.13.0 | causale su periodo: calendario + turni in un'unica scheda (no prompt) |
+| v0.13.1 | riga ASSENZE TOTALI (RP+L) gialla con alert 27%, licenze senza alert; bordi riepilogo più marcati; intestazione calendario bloccata allo scroll verticale |
