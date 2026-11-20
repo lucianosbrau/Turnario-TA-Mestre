@@ -24,18 +24,30 @@ function load() {
         localStorage.setItem(KEY + "-snapshot", raw);
       }
       state = parsed || seedInit();
+      migrAutista();
       state.__appVersion = APP_VERSION;
       if (!state.settings) { state.settings = { anno: ANNO_DEFAULT }; }
       save();
     } else {
       state = seedInit();
+      migrAutista();
       state.__appVersion = APP_VERSION;
       save();
     }
   } catch {
     state = seedInit();
+    migrAutista();
     state.__appVersion = APP_VERSION;
     save();
+  }
+}
+
+// migrazione: i vecchi valori "1".."4" di autista diventano "1°".."4°"
+function migrAutista() {
+  for (const p of state.personale || []) {
+    if (p.autista === "1" || p.autista === "2" || p.autista === "3" || p.autista === "4") {
+      p.autista += "°";
+    }
   }
 }
 

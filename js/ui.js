@@ -205,11 +205,17 @@ function apriPersona(id) {
         <option value="No" ${!p.capoTurno || p.capoTurno === "No" ? "selected" : ""}>No</option>
         <option value="Si" ${p.capoTurno === "Si" ? "selected" : ""}>Si</option>
       </select></label>
-      <label>Autista<select name="autista"><option value=""></option>${AUTISTA.map(a => `<option ${a === p.autista ? "selected" : ""}>${a}</option>`).join("")}</select></label>
       <label>Dal (entratə nel turno)<input type="date" name="dal" value="${p.dal || ""}"></label>
       <label>Al (uscitə dal turno — lascia vuoto se in servizio)<input type="date" name="al" value="${p.al || ""}"></label>
     </div>
-    <fieldset class="spec"><legend>Specializzazioni</legend>${specHtml}</fieldset>
+    <fieldset class="spec"><legend>Specializzazioni</legend>${specHtml}
+      <label>Autista
+        <select name="spec-Autista">
+          <option value="" ${!p.autista ? "selected" : ""}></option>
+          ${AUTISTA.map(a => `<option ${a === p.autista ? "selected" : ""}>${a}</option>`).join("")}
+        </select>
+      </label>
+    </fieldset>
     <div class="azioni-form">
       <button id="fp-salva">Salva</button>
       <button id="fp-annulla">Annulla</button>
@@ -225,7 +231,7 @@ function apriPersona(id) {
       grado: f.querySelector('[name="grado"]').value,
       rp: f.querySelector('[name="rp"]').value,
       capoTurno: f.querySelector('[name="capoTurno"]').value,
-      autista: f.querySelector('[name="autista"]').value,
+      autista: f.querySelector('[name="spec-Autista"]').value,
       dal: f.querySelector('[name="dal"]').value || null,
       al: f.querySelector('[name="al"]').value || null,
       spec: Object.fromEntries(SPEC_FIELDS.map(f2 => [f2, f.querySelector(`[name="spec-${f2}"]`).checked ? "Si" : ""])),
@@ -427,13 +433,13 @@ function renderPresenze() {
   let html = "<thead>";
   html += `<tr><th class="stick1" rowspan="4">Persona</th><th class="stick2" rowspan="4">Grado</th><th class="stick3" rowspan="4">Aut</th>`;
   for (const g of mesi) html += `<th class="mese" colspan="${g.turni.length + 1}" data-mese="${g.mese}">${MESI[Number(g.mese.slice(5)) - 1].toUpperCase()}</th>`;
-  html += `<th class="tot" colspan="7">TOT.</th></tr>`;
+  html += `<th class="tot" colspan="4">TOT.</th></tr>`;
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + totHead(["Turni", "RP", "L", "Mis", "M", "SO", "R"]) + "</tr>";
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + totHead(["L", "L estive", "SO", "R"]) + "</tr>";
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("")).join("") + `<th class="hcell tot" colspan="7"></th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("")).join("") + `<th class="hcell tot" colspan="4"></th></tr>`;
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("")).join("") + `<th class="hcell tot" colspan="7"></th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("")).join("") + `<th class="hcell tot" colspan="4"></th></tr>`;
   html += "</thead>";
 
   // corpo
@@ -453,16 +459,15 @@ function renderPresenze() {
       }
     }
     const tot = {};
-    for (const c of ["L", "Mis", "M", "SO", "R"]) {
+    for (const c of ["L", "SO", "R"]) {
       tot[c] = (s.causali?.[a] || []).filter(x => x.p === p.id && x.c === c).length;
     }
-    tot.RP = mesi.reduce((n, g) => n + g.turni.filter(t => vIsRP(s, p, t, cmap) && attivoIn(p, t.date)).length, 0);
-    tot.Turni = 0;
-    for (const g of mesi) for (const t of g.turni) {
-      if (!attivoIn(p, t.date)) continue;
-      if (presente(s, p, t, cmap)) tot.Turni++;
-    }
-    html += ["Turni", "RP", "L", "Mis", "M", "SO", "R"].map(k => `<td class="tot">${tot[k]}</td>`).join("");
+    const mesiEstivi = [`${a}-06`, `${a}-07`, `${a}-08`, `${a}-09`];
+    tot["L estive"] = (s.causali?.[a] || []).filter(x => x.p === p.id && x.c === "L" && mesiEstivi.includes((x.d || "").slice(0, 7))).length;
+    html += ["L", "L estive", "SO", "R"].map(k => {
+      const cls = k === "L estive" ? (tot[k] > 8 ? " tot estive critico" : " tot estive") : " tot";
+      return `<td class="${cls.trim()}">${tot[k]}</td>`;
+    }).join("");
     html += "</tr>";
   }
   // righe di conteggio in basso
@@ -471,7 +476,7 @@ function renderPresenze() {
     html += `<td class="rpmese"></td>`;
     for (const t of g.turni) html += `<td class="num">${effettiviTurno(s, persone, t, cmap)}</td>`;
   }
-  html += `<td class="tot" colspan="7"></td></tr>`;
+  html += `<td class="tot" colspan="4"></td></tr>`;
   html += `<tr class="effettivi mstre"><td class="stick1" colspan="3">PERSONALE MESTRE (senza rinforzi)</td>`;
   for (const g of mesi) {
     html += `<td class="rpmese"></td>`;
@@ -486,36 +491,54 @@ function renderPresenze() {
       html += `<td class="num">${n}</td>`;
     }
   }
-  html += `<td class="tot" colspan="7"></td></tr>`;
-  // righe di dettaglio per turno: licenze, rinforzi, riposi, autisti e abilitazioni
+  html += `<td class="tot" colspan="4"></td></tr>`;
+  // righe di dettaglio per turno: licenze, rinforzi, riposi, autisti, capi e abilitazioni
+  const GRADI_CAPI = ["CS", "CSE", "CR", "CRE"];
   const righeConteggio = [
-    ["LICENZE (L)", (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "L"],
-    ["RINFORZI (R)", (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "R"],
-    ["IN RP (riposo)", (p, t) => {
-      const c = cmap[cellKey(p.id, t.date)] || "";
-      return c === "" && rpEffettivo(s, p.id, t.date) === t.slot;
-    }],
-    ["AUTISTI", (p, t) => !!p.autista && presenteSede(s, p, t, cmap)],
-    ["AS presenti", (p, t) => p.spec?.AS === "Si" && presenteSede(s, p, t, cmap)],
-    ["AG presenti", (p, t) => p.spec?.AG === "Si" && presenteSede(s, p, t, cmap)],
-    ["SO115 presenti", (p, t) => p.spec?.SO115 === "Si" && presenteSede(s, p, t, cmap)],
+    { etichetta: "LICENZE (L)",
+      filtro: (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "L",
+      critico: (n, personeTurno) => n > Math.floor(0.27 * personeTurno),
+      motivo: "licenze sopra il 27% del personale in turno" },
+    { etichetta: "RINFORZI (R)", filtro: (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "R" },
+    { etichetta: "IN RP (riposo)", filtro: (p, t) => {
+        const c = cmap[cellKey(p.id, t.date)] || "";
+        return c === "" && rpEffettivo(s, p.id, t.date) === t.slot;
+      } },
+    { etichetta: "AUTISTI (3° e 4°)",
+      filtro: (p, t) => (p.autista === "3°" || p.autista === "4°") && presenteSede(s, p, t, cmap),
+      critico: (n) => n < 5, motivo: "autisti presenti sotto 5" },
+    { etichetta: "CAPI",
+      filtro: (p, t) => GRADI_CAPI.includes(p.grado) && presente(s, p, t, cmap),
+      critico: (n) => n < 3, motivo: "capi in turno sotto 3" },
+    { etichetta: "AS presenti", filtro: (p, t) => p.spec?.AS === "Si" && presenteSede(s, p, t, cmap) },
+    { etichetta: "AG presenti", filtro: (p, t) => p.spec?.AG === "Si" && presenteSede(s, p, t, cmap) },
+    { etichetta: "SO115 presenti",
+      filtro: (p, t) => p.spec?.SO115 === "Si" && presenteSede(s, p, t, cmap),
+      critico: (n) => n < 5, motivo: "operatori SO115 presenti sotto 5" },
   ];
-  for (const [etichetta, filtro] of righeConteggio) {
-    html += `<tr class="effettivi"><td class="stick1" colspan="3">${etichetta}</td>`;
+  const criticita = {};   // data -> [motivi]
+  for (const riga of righeConteggio) {
+    html += `<tr class="effettivi"><td class="stick1" colspan="3">${riga.etichetta}</td>`;
     for (const g of mesi) {
       html += `<td class="rpmese"></td>`;
       for (const t of g.turni) {
-        let n = 0;
+        let n = 0, personeTurno = 0;
         for (const p of persone) {
           if (!attivoIn(p, t.date)) continue;
-          if (filtro(p, t)) n++;
+          personeTurno++;
+          if (riga.filtro(p, t)) n++;
         }
-        html += `<td class="num">${n}</td>`;
+        let crit = false;
+        if (riga.critico && personeTurno > 0) crit = riga.critico(n, personeTurno);
+        if (crit) (criticita[t.date] = criticita[t.date] || []).push(riga.motivo);
+        html += `<td class="num ${crit ? "critico" : ""}">${n}</td>`;
       }
     }
-    html += `<td class="tot" colspan="7"></td></tr>`;
+    html += `<td class="tot" colspan="4"></td></tr>`;
   }
   html += "</tbody>";
+  // avviso delle criticita' future (dopo oggi), chiudibile con la x
+  aggiornaAvvisoCriticita(criticita, a);
   tb.innerHTML = html;
 
   // interazione celle
@@ -535,13 +558,38 @@ function renderPresenze() {
   }));
 }
 
+let avvisoChiuso = false;   // si riapre al prossimo avvio dell'app
+function aggiornaAvvisoCriticita(criticita, annoSel) {
+  const box = $("#avviso-criticita");
+  if (!box) return;
+  if (avvisoChiuso) { box.style.display = "none"; return; }
+  const oggi = todayIso();
+  const future = Object.keys(criticita).filter(d => d > oggi).sort();
+  if (!future.length) { box.style.display = "none"; return; }
+  const lista = future.slice(0, 15).map(d => {
+    const [aaa, mm, gg] = d.split("-");
+    return `<li><b>${gg}/${mm}/${aaa}</b> — ${criticita[d].join("; ")}</li>`;
+  }).join("");
+  const altre = future.length > 15 ? `<p class="aiuto">…e altre ${future.length - 15} date.</p>` : "";
+  box.innerHTML = `<div class="avviso-testo">
+      <b>Attenzione — criticità future (${annoSel}):</b>
+      <ul>${lista}</ul>${altre}
+    </div>
+    <button id="avviso-chiudi" title="Chiudi">×</button>`;
+  box.style.display = "flex";
+  $("#avviso-chiudi").onclick = () => {
+    avvisoChiuso = true;
+    box.style.display = "none";
+  };
+}
+
 function vIsRP(s, p, t, cmap) {
   const v = valoreCella(s, p, t, cmap);
   return v === "RP";
 }
 
 function totHead(labels) {
-  return labels.map(l => `<th class="hcell">${l}</th>`).join("");
+  return labels.map(l => `<th class="hcell ${l === "L estive" ? "estive" : ""}">${l}</th>`).join("");
 }
 
 function menuCausale(anchor, pid, date) {

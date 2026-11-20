@@ -256,3 +256,25 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
   box-shadow: 0 2px 10px rgba(0,0,0,.25);
 }
 #chiudi-modale:hover { background: #fff; transform: scale(1.06); }
+
+
+/* conteggi critici */
+#lenzuolo td.num.critico { background: #ff9999 !important; color: #7a1010; font-weight: 700; }
+#avviso-criticita {
+  display: none; margin: 10px 0; position: relative;
+  background: #fff4f3; border: 1px solid #ffb3ab; border-left: 6px solid #e53935;
+  border-radius: 12px; padding: 12px 46px 12px 16px; color: #6c1010;
+  font-size: .85rem; box-shadow: 0 1px 8px rgba(183,28,28,.15);
+}
+#avviso-criticita ul { margin: 6px 0 0; padding-left: 18px; }
+#avviso-criticita li { margin: 2px 0; }
+#avviso-chiudi {
+  position: absolute; top: 8px; right: 10px; width: 30px; height: 30px;
+  border-radius: 50%; border: 1px solid #ffb3ab; background: #fff;
+  color: #b71c1c; font-size: 1.05rem; font-weight: 700; cursor: pointer;
+}
+
+/* colonna L estive: gialla, rossa se oltre 8 licenze estive */
+#lenzuolo th.estive { background: #ffe28a; color: #5a4300; }
+#lenzuolo td.tot.estive { background: #ffe28a; color: #5a4300; }
+#lenzuolo td.tot.estive.critico { background: #ff9999 !important; color: #7a1010; font-weight: 700; }

@@ -11,6 +11,9 @@ Anno di partenza: **2027**.
   - Anno di riferimento: resta memorizzato tra una sessione e l'altra.
   - Elenco del personale con grado, RP (salto turno), specializzazioni e
     periodo di validità (dal / al). Chi esce dal turno resta in archivio.
+  - Tra le specializzazioni di ogni persona c'e' anche **Autista** con menu
+    a tendina: 1°, 2°, 3° o 4° (i vecchi dati salvati "1".."4" vengono
+    convertiti automaticamente).
   - Pulsanti: Presenze, Inserisci personale, Cancella personale, Cambio RP
     (definitivo, con decorrenza e storico), Ordina personale (l'ordine per
     grado e' comunque automatico a ogni inserimento), Esporta backup.
@@ -36,10 +39,20 @@ Anno di partenza: **2027**.
     la DATA DI INIZIO e QUANTI TURNI consecutivi (per un singolo giorno resta
     il clic sulla cella). Se la data indicata non e' un giorno di turno, la
     causale parte dal primo turno utile.
-  - Totali a destra per persona; in basso DUE righe di conteggio:
-    PERSONALE IN TURNO (celle vuote + SO + R, riposi e assenze esclusi) e
-    PERSONALE MESTRE (come sopra ma senza i rinforzi R, in servizio
-    presso altre sedi).
+  - Totali a destra per persona: L, **L estive** (licenze dei mesi di
+    giugno, luglio, agosto e settembre; colonna gialla, diventa rossa se
+    una persona supera le 8 licenze estive), SO e R.
+  - Righe di conteggio in basso per ogni turno: PERSONALE IN TURNO
+    (celle vuote + SO + R, riposi e assenze esclusi), PERSONALE MESTRE
+    (come sopra ma senza i rinforzi R), LICENZE, RINFORZI, IN RP,
+    AUTISTI (solo chi in anagrafica ha 3° o 4°), CAPI (gradi CS, CSE,
+    CR, CRE), AS, AG, SO115 (conta chi ha la spunta SO115 in anagrafica,
+    non la causale SO).
+  - **Evidenza delle criticita'**: la cella del conteggio diventa rossa se
+    le licenze superano il 27% del personale in turno di quel giorno, se gli
+    autisti (3°/4°) scendono sotto 5, se i capi scendono sotto 3 o se gli
+    SO115 scendono sotto 5. Se la criticita' e' in una data futura, un avviso
+    in alto (chiudibile con la x) indica data e motivo.
   - Ordine dei nominativi: per grado (CSE, CR, CRE, CS, VC, VE, VF) con il
     capo turno per primo, come nel foglio Excel; a parita' di grado resta
     l'ordine di inserimento.
