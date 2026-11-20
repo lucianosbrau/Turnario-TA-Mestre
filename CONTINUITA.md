@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.14.1. Ultima versione pubblicata: **0.14.1**.
+Data di riferimento: fine v0.14.2. Ultima versione pubblicata: **0.14.2**.
 
 **Sala Operativa (v0.14.0)**: pulsante verde in coda alla barra della home,
 routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
@@ -227,3 +227,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.13.1 | riga ASSENZE TOTALI (RP+L) gialla con alert 27%, licenze senza alert; bordi riepilogo più marcati; intestazione calendario bloccata allo scroll verticale |
 | v0.14.0 | pulsante verde Sala Operativa: pagina dedicata con lenzuolo limitato al personale SO115 (struttura iniziale; riepiloghi da definire) |
 | v0.14.1 | sala operativa: solo causale SO, riepiloghi Turni mensili e totale SO, personale di rinforzo esterno confinato, separatore grafico |
+| v0.14.2 | Turni mensili = SO assegnati anche per il personale Mestre; pulsante dedicato 'Elimina personale' per gli esterni (persistono tra gli anni) |
