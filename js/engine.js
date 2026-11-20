@@ -78,13 +78,21 @@ export function valoreCella(state, person, turn, causaliMap) {
   return "";
 }
 
-// effettivi di sede per un turno: persone attive con cella vuota, SO o R
-export function effettiviTurno(persone, turn, causaliMap) {
+// e' una presenza di sede? causali SO/R contano, RP e' riposo (non conteggiato),
+// la cella vuota e' presenza solo se non e' il giorno di RP della persona
+export function presente(state, person, turn, causaliMap) {
+  const c = causaliMap[cellKey(person.id, turn.date)] || "";
+  if (c === "SO" || c === "R") return true;
+  if (c !== "") return false;
+  return rpEffettivo(state, person.id, turn.date) !== turn.slot;
+}
+
+// effettivi di sede per un turno: persone attive e presenti
+export function effettiviTurno(state, persone, turn, causaliMap) {
   let n = 0;
   for (const p of persone) {
     if (!attivoIn(p, turn.date)) continue;
-    const c = causaliMap[cellKey(p.id, turn.date)] || "";
-    if (c === "" || c === "SO" || c === "R") n++;
+    if (presente(state, p, turn, causaliMap)) n++;
   }
   return n;
 }
