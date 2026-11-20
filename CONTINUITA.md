@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.12.3. Ultima versione pubblicata: **0.12.3**.
+Data di riferimento: fine v0.13.0. Ultima versione pubblicata: **0.13.0**.
 
 ## 1. Contesto e obiettivo
 
@@ -67,9 +67,12 @@ Data di riferimento: fine v0.12.3. Ultima versione pubblicata: **0.12.3**.
 Causale "A" eliminata su richiesta. Cella vuota = in turno.
 
 **Inserimento causali**: clic sulla cella = quel giorno; clic sul NOME =
-causale con **data di inizio + numero di turni consecutivi** (se la data
-non è un turno parte dal primo turno utile). Dopo ogni inserimento di
-causale il banner delle criticità si aggiorna (vedi sotto).
+scheda unica con **menu a tendina della causale, calendario nativo
+(type=date, default: oggi se nell'anno del lenzuolo, altrimenti 1
+gennaio) e numero di turni consecutivi**, tutto nella stessa maschera
+(v0.13.0: niente più prompt sequenziali; se la data scelta non è un
+turno parte dal primo turno utile). Dopo ogni inserimento di causale il
+banner delle criticità si aggiorna (vedi sotto).
 
 **Righe di conteggio in basso (per ogni turno)**:
 1. PERSONALE IN TURNO (`presente`: celle vuote + SO + R, riposi/assenze esclusi)
@@ -203,3 +206,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.12.1 | recupero dell'omonimo uscito dal turno |
 | v0.12.2 | rimossa la riga "Personale in turno oggi" |
 | v0.12.3 | triangolo ▸ di evidenziazione riga nel lenzuolo |
+| v0.13.0 | causale su periodo: calendario + turni in un'unica scheda (no prompt) |

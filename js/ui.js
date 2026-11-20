@@ -694,24 +694,29 @@ function menuNomeCausale(anchor, pid) {
   const r = anchor.getBoundingClientRect();
   menu.style.left = Math.min(r.left, window.innerWidth - 260) + "px";
   menu.style.top = (r.bottom + window.scrollY + 2) + "px";
-  menu.innerHTML = `<p class="menu-titolo">Causale per un periodo — ${anchor.textContent.trim()}</p>` +
-    Object.keys(CAUSALI).filter(c => c !== "RP").map(c =>
-      `<button data-c="${c}">${c} — ${CAUSALI[c].label}</button>`).join("") +
-    `<button data-c="" class="ripristina">▪ vuoto (cancella le causali del periodo)</button>`;
+  menu.style.left = Math.min(r.left, window.innerWidth - 320) + "px";
+  menu.innerHTML = `<p class="menu-titolo">Causale per un periodo — ${anchor.textContent.trim()}</p>
+    <label class="menu-campo">Causale
+      <select id="nome-causale">
+        ${Object.keys(CAUSALI).filter(c => c !== "RP").map(c =>
+          `<option value="${c}">${c} — ${CAUSALI[c].label}</option>`).join("")}
+        <option value="">▪ vuota (cancella le causali del periodo)</option>
+      </select></label>
+    <label class="menu-campo">Data di inizio (calendario)
+      <input type="date" id="nome-causale-da" value="${todayIso().startsWith(anno()) ? todayIso() : anno() + "-01-01"}"></label>
+    <label class="menu-campo">Turni consecutivi
+      <input type="number" id="nome-causale-qta" min="1" step="1" value="1"></label>
+    <button id="nome-causale-ok">Applica</button><button id="nome-causale-annulla" class="ripristina">Annulla</button>`;
   document.body.appendChild(menu);
-  menu.addEventListener("click", (e) => {
-    const b = e.target.closest("button[data-c]");
-    if (!b) return;
-    const codice = b.dataset.c;
+  $("#nome-causale-annulla").onclick = chiudiMenu;
+  $("#nome-causale-ok").onclick = () => {
+    const codice = $("#nome-causale").value;
     const a = anno();
     const turni = turniAnno(a);
-    const da = prompt(`Data di inizio (AAAA-MM-GG):`, `${a}-01-01`);
-    if (da === null) return;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(da)) { alert("Data non valida (formato AAAA-MM-GG)."); return; }
-    const qta = prompt("Quanti turni (consecutivi)?", "1");
-    if (qta === null) return;
-    const nTurni = parseInt(qta, 10);
-    if (!Number.isFinite(nTurni) || nTurni < 1) { alert("Numero di turni non valido."); return; }
+    const da = $("#nome-causale-da").value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(da)) { alert("Data non valida."); return; }
+    const nTurni = parseInt($("#nome-causale-qta").value, 10);
+    if (!Number.isFinite(nTurni) || nTurni < 1) { alert("Il numero di turni deve essere almeno 1."); return; }
     // primo turno che cade alla data indicata o dopo
     let i0 = turni.findIndex(t => t.date >= da);
     if (i0 < 0) { chiudiMenu(); alert("Nessun turno a partire da quella data (fine anno)."); return; }
@@ -722,7 +727,7 @@ function menuNomeCausale(anchor, pid) {
     avvisoDaCausale = true; avvisoChiuso = false;
     alert(`Causale "${codice || "rimossa"}" su ${nTurni} turn${nTurni === 1 ? "o" : "i"}: da ${turni[i0].date} a ${fino.date}.`);
     renderPresenze();
-  });
+  };
 }
 
 function chiudiMenu() {
