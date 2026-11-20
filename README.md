@@ -28,7 +28,7 @@ Anno di partenza: **2027**.
     convertiti automaticamente).
   - Pulsanti: Presenze, Inserisci personale, Cancella personale, Cambio RP
     (definitivo, con decorrenza e storico), Esporta backup.
-  - "Esporta backup" apre una scheda dove scegliere ** quali fogli**
+  - "Esporta backup" apre una scheda dove scegliere **quali fogli**
     mandare in **Excel** (Presenze e/o Sala Operativa, dell'anno
     selezionato: file .xml apribile da Excel con le righe, le causali e le
     righe di conteggio) e dove resta disponibile anche il **backup JSON**
