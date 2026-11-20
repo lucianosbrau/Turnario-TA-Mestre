@@ -278,3 +278,8 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 #lenzuolo th.estive { background: #ffe28a; color: #5a4300; }
 #lenzuolo td.tot.estive { background: #ffe28a; color: #5a4300; }
 #lenzuolo td.tot.estive.critico { background: #ff9999 !important; color: #7a1010; font-weight: 700; }
+
+/* cancellazione massiva: elenco con spunte */
+.canc-lista { max-height: 320px; overflow-y: auto; border: 1px solid var(--grigio); border-radius: 6px; padding: 8px 12px; margin: 10px 0; }
+.canc-riga { display: block; padding: 3px 0; }
+#btn-canc-tutti-sel, .aiuto-btn { background: none; border: none; color: var(--blu, #1d4ed8); text-decoration: underline; cursor: pointer; font-size: .85rem; }

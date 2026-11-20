@@ -296,26 +296,36 @@ function apriCancellaPersona() {
   const persone = ordinaPersone(s.personale);
   $("#form-persona").innerHTML = `
     <h3>Cancella personale</h3>
-    <p class="aiuto">La persona viene rimossa dall'archivio insieme alle sue presenze e al suo RP.
-    Se invece e' solo uscita dal turno, meglio metterle una data di uscita (dal pulsante Modifica): le presenze restano nello storico.</p>
-    <label class="campo">Persona da cancellare
-      <select id="canc-pers">${persone.map(p => `<option value="${p.id}">${p.cognome} ${p.nome} (${p.grado})</option>`).join("")}</select>
-    </label>
+    <p class="aiuto">Le persone selezionate vengono rimosse dall'archivio insieme alle loro presenze e al loro RP.
+    Se invece qualcuno e' solo uscito dal turno, meglio mettergli una data di uscita (dal pulsante Modifica): le presenze restano nello storico.</p>
+    <div class="canc-lista">
+      ${persone.map(p => `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (${p.grado})</label>`).join("")}
+    </div>
     <div class="azioni-form">
-      <button id="canc-ok" class="distruttivo">Cancella definitivamente</button>
+      <button id="canc-tutti-sel" class="aiuto-btn">Seleziona tutti</button>
+      <button id="canc-ok" class="distruttivo">Cancella definitivamente i selezionati</button>
       <button id="fp-annulla">Annulla</button>
     </div>`;
   $("#modale").style.display = "flex";
   $("#fp-annulla").onclick = chiudiModale;
+  $("#canc-tutti-sel").onclick = () => {
+    const boxes = [...$("#form-persona").querySelectorAll('.canc-lista input[type="checkbox"]')];
+    const tuttiGia = boxes.every(b => b.checked);
+    boxes.forEach(b => b.checked = !tuttiGia);
+  };
   $("#canc-ok").onclick = () => {
-    const id = $("#canc-pers").value;
-    const p = s.personale.find(x => x.id === id);
-    if (!p) return;
-    if (confirm(`Confermi la cancellazione di ${p.cognome} ${p.nome}? L'operazione elimina anche tutte le sue presenze e non si puo' annullare.`)) {
-      store.deletePerson(id);
+    const selezionati = [...$("#form-persona").querySelectorAll('.canc-lista input[type="checkbox"]:checked')]
+      .map(b => b.value);
+    if (!selezionati.length) { alert("Nessuna persona selezionata: metti una spunta accanto ai nominativi da cancellare."); return; }
+    const nomi = selezionati.map(id => {
+      const p = s.personale.find(x => x.id === id);
+      return p ? `${p.cognome} ${p.nome}` : "";
+    }).filter(Boolean);
+    if (confirm(`Confermi la cancellazione di ${nomi.length === 1 ? "1 persona" : nomi.length + " persone"}: ${nomi.join(", ")}? L'operazione elimina anche tutte le loro presenze e non si puo' annullare.`)) {
+      for (const id of selezionati) store.deletePerson(id);
       chiudiModale();
       renderHome();
-      alert("Persona cancellata.");
+      alert(`Cancellat${nomi.length === 1 ? "a 1 persona" : "e " + nomi.length + " persone"}.`);
     }
   };
 }
