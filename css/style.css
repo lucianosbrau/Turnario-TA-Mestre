@@ -67,7 +67,7 @@ button:hover { background: #f6f8fa; box-shadow: 0 2px 8px rgba(36,49,58,.12); }
 button:active { transform: translateY(1px); }
 button.grande {
   background: linear-gradient(135deg, var(--accento), #ff7a50); border: none; color: #fff;
-  font-weight: 700; padding: 11px 40px; box-shadow: 0 4px 14px rgba(255,84,41,.35);
+  font-weight: 700; padding: 11px 52px; box-shadow: 0 4px 14px rgba(255,84,41,.35);
 }
 button.grande:hover { box-shadow: 0 6px 18px rgba(255,84,41,.45); background: linear-gradient(135deg, #ff6a42, #ff8f6b); }
 button.distruttivo { color: #b3261e; border-color: #e6b8b5; }
