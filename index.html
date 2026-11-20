@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnario Turno A — Portogruaro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ PAGINA PRINCIPALE (Personale) ============ -->
+<section id="pagina-home">
+  <header>
+    <h1>Turnario Turno A — Portogruaro</h1>
+    <div class="info-versione">
+      <span id="versione" class="badge"></span>
+      <label>Anno di riferimento
+        <input type="number" id="anno" min="2020" max="2100" step="1">
+      </label>
+    </div>
+  </header>
+
+  <p class="azioni-bar">
+    <button id="btn-presenze" class="grande">Presenze — apri il lenzuolo</button>
+    <button id="btn-nuova-persona">Nuova persona</button>
+    <button id="btn-export">Esporta backup</button>
+    <button id="btn-import">Importa backup</button>
+    <input type="file" id="file-import" accept="application/json,.json" hidden>
+    <button id="btn-reset" class="distruttivo">Ripristina dati iniziali</button>
+  </p>
+  <p id="situazione" class="situazione"></p>
+
+  <h2>Personale</h2>
+  <p class="aiuto">La colonna RP mostra il salto turno attuale di oggi. Quello tra parentesi è l'RP base.
+     Chi ha una data di uscita resta in archivio: le sue presenze non si perdono, ma non compare più nella compilazione corrente.</p>
+  <table id="tabella-personale">
+    <thead>
+      <tr><th>Persona</th><th>Grado</th><th>RP</th><th>RP base</th><th>Aut</th><th>Specializzazioni</th><th>Dal</th><th>Al</th><th></th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- ============ PAGINA PRESENZE (lenzuolo) ============ -->
+<section id="pagina-presenze" hidden>
+  <header class="barra-presenze">
+    <button id="btn-home">← Torna al personale</button>
+    <h2>Presenze <span id="presenze-anno"></span></h2>
+    <label class="toggle"><input type="checkbox" id="solo-attivi" checked> Mostra solo personale in turno</label>
+    <div class="legenda">
+      <span class="lg"><b>RP</b> riposo (calcolato)</span>
+      <span class="lg c-L"><b>L</b> licenza</span>
+      <span class="lg c-Mis"><b>Mis</b> missione</span>
+      <span class="lg c-M"><b>M</b> malattia</span>
+      <span class="lg c-SO"><b>SO</b> sala operativa</span>
+      <span class="lg c-R"><b>R</b> rinforzo</span>
+    </div>
+  </header>
+  <p class="aiuto">Clicca una cella per mettere/togliere una causale. Clicca la colonna <b>RP</b> di un mese
+     per cambiare il salto turno di quella persona <b>solo per quel mese</b> (eccezione che non tocca l'archivio generale).</p>
+  <div class="lenzuolo-wrap">
+    <table id="lenzuolo"></table>
+  </div>
+</section>
+
+<!-- ============ MODALE ============ -->
+<div id="modale">
+  <div id="form-persona" class="modale-box"></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

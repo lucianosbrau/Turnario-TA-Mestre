@@ -1,0 +1,13 @@
+{
+  "name": "Turnario Turno A — Portogruaro",
+  "short_name": "Turnario TA",
+  "description": "Gestione presenze e turni del Turno A di Portogruaro",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#1a2b3c",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
