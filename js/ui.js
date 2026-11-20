@@ -23,6 +23,7 @@ export function init() {
   $("#btn-presenze").addEventListener("click", () => { location.hash = "#presenze"; });
   $("#btn-so").addEventListener("click", () => { location.hash = "#so"; });
   $("#btn-so-rinforzo").addEventListener("click", () => { apriSoRinforzi(); });
+  $("#btn-so-elimina").addEventListener("click", () => { apriSoElimina(); });
   $("#btn-so-home").addEventListener("click", () => { location.hash = ""; mostraPagina(); });
   $("#btn-home").addEventListener("click", () => { location.hash = "#"; });
   $("#btn-export").addEventListener("click", esporta);
@@ -205,7 +206,7 @@ function renderSo() {
   html += `<tr><th class="stick1" rowspan="4">Persona</th><th class="stick2" rowspan="4">Grado</th><th class="stick3" rowspan="4">Aut</th>`;
   for (const g of mesi) html += `<th class="mese" colspan="${g.turni.length + 2}" data-mese="${g.mese}">${MESI[Number(g.mese.slice(5)) - 1].toUpperCase()}</th>`;
   html += `<th class="tot" colspan="1">TOT.</th></tr>`;
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("") + `<th class="hcell tot">Turni</th>`).join("") + totHead(["SO"]) + "</tr>";
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("") + `<th class="hcell tot">Turni SO</th>`).join("") + totHead(["SO"]) + "</tr>";
   html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("") + `<th class="hcell tot"></th>`).join("") + `<th class="hcell tot"></th></tr>`;
   html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("") + `<th class="hcell tot"></th>`).join("") + `<th class="hcell tot"></th></tr>`;
   html += "</thead><tbody>";
@@ -226,7 +227,6 @@ function renderSo() {
         r += `<td class="cella v-${v} col${t.slot} ${!esterno && !attivoIn(p, t.date) ? "gray" : ""}" data-cella="${p.id}|${t.date}" title="${t.date} ${t.phase} ${t.slot}">${v === "RP" ? "RP" : v}</td>`;
         if (v === "SO") { turniFatti++; totSO++; }
       }
-      if (!esterno) turniFatti = g.turni.filter(t => presente(s, p, t, cmap)).length;
       r += `<td class="tot turni-mese">${turniFatti}</td>`;
     }
     r += `<td class="tot" title="Turni SO nell'anno">${totSO}</td>`;
@@ -748,7 +748,6 @@ function apriSoRinforzi() {
     </div>
     <div class="azioni-form">
       <button id="ext-add" class="verde">Aggiungi</button>
-      ${esterni.length ? `<button id="ext-del" class="distruttivo">Elimina i selezionati</button>` : ""}
       <button id="fp-annulla">Chiudi</button>
     </div>`;
   $("#modale").style.display = "flex";
@@ -763,7 +762,28 @@ function apriSoRinforzi() {
     renderSo();
     alert(`Aggiunto ${cognome} ${nome} ai rinforzi della Sala Operativa.`);
   };
-  if (esterni.length) $("#ext-del").onclick = () => {
+}
+
+// eliminazione del personale di rinforzo esterno (Sala Operativa)
+function apriSoElimina() {
+  const s = store.getState();
+  const esterni = s.soRinforzi || [];
+  $("#form-persona").innerHTML = `
+    <h3>Elimina personale di rinforzo</h3>
+    <p class="aiuto">Rimuove gli esterni dalla Sala Operativa insieme a tutti i loro turni SO.
+    Il personale di Mestre non si tocca da qui: per quello usare la gestione del personale della pagina principale.</p>
+    <div class="canc-lista">
+      ${esterni.length ? esterni.map(p =>
+        `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (${p.grado || "grado non indicato"})</label>`).join("")
+        : `<p class="aiuto">Nessun rinforzo esterno inserito.</p>`}
+    </div>
+    <div class="azioni-form">
+      <button id="ext-del2" class="distruttivo">Elimina i selezionati</button>
+      <button id="fp-annulla">Chiudi</button>
+    </div>`;
+  $("#modale").style.display = "flex";
+  $("#fp-annulla").onclick = chiudiModale;
+  if (esterni.length) $("#ext-del2").onclick = () => {
     const sel = [...$("#form-persona").querySelectorAll(".canc-lista input:checked")].map(b => b.value);
     if (!sel.length) { alert("Nessun rinforzo selezionato: metti una spunta accanto al nominativo da eliminare."); return; }
     const nomi = sel.map(id => { const p = esterni.find(x => x.id === id); return p ? `${p.cognome} ${p.nome}` : ""; }).filter(Boolean);
