@@ -119,32 +119,32 @@ td.aut { text-align: center; }
    la pagina Personale resta centrata per leggibilita' */
 #pagina-presenze { max-width: none; padding: 14px 20px 32px; }
 .lenzuolo-wrap { overflow: auto; max-height: calc(100vh - 150px); border-radius: 14px; background: #fff; box-shadow: 0 1px 8px rgba(36,49,58,.08); border: 1px solid var(--bordo); }
-#lenzuolo th, #lenzuolo td { border: 1px solid #e3e8ec; padding: 3px 5px; text-align: center; white-space: nowrap; font-size: .76rem; }
-#lenzuolo thead th { position: sticky; font-weight: 600; background: #f6f8fa; z-index: 2; }
-#lenzuolo thead { position: sticky; top: 0; z-index: 4; }
-#lenzuolo thead th.stick1, #lenzuolo thead th.stick2, #lenzuolo thead th.stick3 { z-index: 5; }
-#lenzuolo th.mese {
+#lenzuolo, #lenzuolo-so th, #lenzuolo, #lenzuolo-so td { border: 1px solid #e3e8ec; padding: 3px 5px; text-align: center; white-space: nowrap; font-size: .76rem; }
+#lenzuolo, #lenzuolo-so thead th { position: sticky; font-weight: 600; background: #f6f8fa; z-index: 2; }
+#lenzuolo, #lenzuolo-so thead { position: sticky; top: 0; z-index: 4; }
+#lenzuolo, #lenzuolo-so thead th.stick1, #lenzuolo, #lenzuolo-so thead th.stick2, #lenzuolo, #lenzuolo-so thead th.stick3 { z-index: 5; }
+#lenzuolo, #lenzuolo-so th.mese {
   background: var(--grigio); color: var(--scuro); cursor: pointer;
   font-weight: 700; font-size: .78rem; letter-spacing: .05em; padding: 6px 8px;
   border-bottom: 3px solid var(--accento);
 }
-#lenzuolo th.mese:hover { background: #cfd4d9; }
-#lenzuolo th.hcell { font-size: .72rem; }
-#lenzuolo th.rpm, #lenzuolo td.rpmese { background: #fff3c2; font-weight: 700; cursor: pointer; color: #7a5200; }
-#lenzuolo td.rpmese.eccezione { outline: 2px dashed var(--accento); outline-offset: -2px; }
-#lenzuolo th.tot, #lenzuolo td.tot { background: var(--grigio); font-weight: 700; font-size: .8rem; }
-#lenzuolo .nome { text-align: left; font-weight: 700; white-space: nowrap; }
-#lenzuolo td.cella { cursor: pointer; min-width: 27px; font-weight: 700; }
-#lenzuolo td.cella:hover { outline: 2px solid var(--scuro); outline-offset: -2px; }
-#lenzuolo td.cella.v-RP { background: var(--giallo-rp); color: #4a3b00; }
-#lenzuolo td.cella.v-L { background: #d7ecd9; color: #1c5c20; }
-#lenzuolo td.cella.v-Mis { background: #d6e4f7; color: #0d47a1; }
-#lenzuolo td.cella.v-M { background: #f6d7d5; color: #a51208; }
-#lenzuolo td.cella.v-SO { background: #e9dcf5; color: #54107e; }
-#lenzuolo td.cella.v-R { background: #d3eef1; color: #005661; }
-#lenzuolo tr.effettivi td { background: #e8f0e8; font-weight: 700; border-color: #b9c4cc; }
-#lenzuolo tr.effettivi.assenzetot td { background: #ffe28a; color: #5a4300; }
-#lenzuolo tr.effettivi.assenzetot td.num.critico { background: #ff9999 !important; color: #7a1010; }
+#lenzuolo, #lenzuolo-so th.mese:hover { background: #cfd4d9; }
+#lenzuolo, #lenzuolo-so th.hcell { font-size: .72rem; }
+#lenzuolo, #lenzuolo-so th.rpm, #lenzuolo, #lenzuolo-so td.rpmese { background: #fff3c2; font-weight: 700; cursor: pointer; color: #7a5200; }
+#lenzuolo, #lenzuolo-so td.rpmese.eccezione { outline: 2px dashed var(--accento); outline-offset: -2px; }
+#lenzuolo, #lenzuolo-so th.tot, #lenzuolo, #lenzuolo-so td.tot { background: var(--grigio); font-weight: 700; font-size: .8rem; }
+#lenzuolo, #lenzuolo-so .nome { text-align: left; font-weight: 700; white-space: nowrap; }
+#lenzuolo, #lenzuolo-so td.cella { cursor: pointer; min-width: 27px; font-weight: 700; }
+#lenzuolo, #lenzuolo-so td.cella:hover { outline: 2px solid var(--scuro); outline-offset: -2px; }
+#lenzuolo, #lenzuolo-so td.cella.v-RP { background: var(--giallo-rp); color: #4a3b00; }
+#lenzuolo, #lenzuolo-so td.cella.v-L { background: #d7ecd9; color: #1c5c20; }
+#lenzuolo, #lenzuolo-so td.cella.v-Mis { background: #d6e4f7; color: #0d47a1; }
+#lenzuolo, #lenzuolo-so td.cella.v-M { background: #f6d7d5; color: #a51208; }
+#lenzuolo, #lenzuolo-so td.cella.v-SO { background: #e9dcf5; color: #54107e; }
+#lenzuolo, #lenzuolo-so td.cella.v-R { background: #d3eef1; color: #005661; }
+#lenzuolo, #lenzuolo-so tr.effettivi td { background: #e8f0e8; font-weight: 700; border-color: #b9c4cc; }
+#lenzuolo, #lenzuolo-so tr.effettivi.assenzetot td { background: #ffe28a; color: #5a4300; }
+#lenzuolo, #lenzuolo-so tr.effettivi.assenzetot td.num.critico { background: #ff9999 !important; color: #7a1010; }
 
 /* tinte delle colonne per salto turno (palette dell'Excel) */
 .cella.colA1:not(.v-RP):not(.v-L):not(.v-Mis):not(.v-M):not(.v-SO):not(.v-R) { background: #f6fceb; }
@@ -156,14 +156,14 @@ td.aut { text-align: center; }
 .cella.colA7:not(.v-RP):not(.v-L):not(.v-Mis):not(.v-M):not(.v-SO):not(.v-R) { background: #ecf8f4; }
 .cella.colA8:not(.v-RP):not(.v-L):not(.v-Mis):not(.v-M):not(.v-SO):not(.v-R) { background: #f2f2f2; }
 
-#lenzuolo td.gray, #lenzuolo tr.gray td { color: #adb8c2; background: #fbfcfd; }
-#lenzuolo tr.gray td.cella { color: #c2ccd5; }
+#lenzuolo, #lenzuolo-so td.gray, #lenzuolo, #lenzuolo-so tr.gray td { color: #adb8c2; background: #fbfcfd; }
+#lenzuolo, #lenzuolo-so tr.gray td.cella { color: #c2ccd5; }
 
 /* colonne fisse del lenzuolo */
-#lenzuolo th.stick1, #lenzuolo td.stick1 { position: sticky; left: 0; z-index: 3; background: #fff; min-width: 130px; }
-#lenzuolo th.stick2, #lenzuolo td.stick2 { position: sticky; left: 130px; z-index: 3; background: #fff; }
-#lenzuolo th.stick3, #lenzuolo td.stick3 { position: sticky; left: 172px; z-index: 3; background: #fff; }
-#lenzuolo tr.effettivi td.stick1 { left: 0; background: #e8f0e8; }
+#lenzuolo, #lenzuolo-so th.stick1, #lenzuolo, #lenzuolo-so td.stick1 { position: sticky; left: 0; z-index: 3; background: #fff; min-width: 130px; }
+#lenzuolo, #lenzuolo-so th.stick2, #lenzuolo, #lenzuolo-so td.stick2 { position: sticky; left: 130px; z-index: 3; background: #fff; }
+#lenzuolo, #lenzuolo-so th.stick3, #lenzuolo, #lenzuolo-so td.stick3 { position: sticky; left: 172px; z-index: 3; background: #fff; }
+#lenzuolo, #lenzuolo-so tr.effettivi td.stick1 { left: 0; background: #e8f0e8; }
 
 /* ---------- menu causale ---------- */
 .menu-causale {
@@ -199,7 +199,7 @@ table.mini td, table.mini th { border: 1px solid var(--bordo); padding: 5px 10px
 table.mini button { padding: 4px 10px; font-size: .78rem; }
 
 /* seconda riga di conteggio (senza rinforzi) */
-#lenzuolo tr.effettivi.mstre td { background: #dff0e9; color: #0b4f3f; }
+#lenzuolo, #lenzuolo-so tr.effettivi.mstre td { background: #dff0e9; color: #0b4f3f; }
 
 /* ---------- sincronizzazione ---------- */
 .stato-sync {
@@ -259,7 +259,7 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 
 
 /* conteggi critici */
-#lenzuolo td.num.critico { background: #ff9999 !important; color: #7a1010; font-weight: 700; }
+#lenzuolo, #lenzuolo-so td.num.critico { background: #ff9999 !important; color: #7a1010; font-weight: 700; }
 #avviso-criticita {
   display: none; margin: 10px 0; position: relative;
   background: #fff4f3; border: 1px solid #ffb3ab; border-left: 6px solid #e53935;
@@ -275,9 +275,9 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 }
 
 /* colonna L estive: gialla, rossa se oltre 8 licenze estive */
-#lenzuolo th.estive { background: #ffe28a; color: #5a4300; }
-#lenzuolo td.tot.estive { background: #ffe28a; color: #5a4300; }
-#lenzuolo td.tot.estive.critico { background: #ff9999 !important; color: #7a1010; font-weight: 700; }
+#lenzuolo, #lenzuolo-so th.estive { background: #ffe28a; color: #5a4300; }
+#lenzuolo, #lenzuolo-so td.tot.estive { background: #ffe28a; color: #5a4300; }
+#lenzuolo, #lenzuolo-so td.tot.estive.critico { background: #ff9999 !important; color: #7a1010; font-weight: 700; }
 
 /* cancellazione massiva: elenco con spunte */
 .canc-lista { max-height: 320px; overflow-y: auto; border: 1px solid var(--grigio); border-radius: 6px; padding: 8px 12px; margin: 10px 0; }
@@ -291,10 +291,14 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 .evid-riga { border: none; background: none; cursor: pointer; color: #1d6ec8;
   font-size: .9rem; padding: 0 2px 0 6px; line-height: 1; }
 .evid-riga:hover { color: var(--accento); }
-#lenzuolo tr.evidenziata td { box-shadow: inset 0 0 0 999px rgba(255,193,7,.26); }
-#lenzuolo tr.evidenziata td.critico { box-shadow: inset 0 0 0 999px rgba(255,193,7,.26); }
+#lenzuolo, #lenzuolo-so tr.evidenziata td { box-shadow: inset 0 0 0 999px rgba(255,193,7,.26); }
+#lenzuolo, #lenzuolo-so tr.evidenziata td.critico { box-shadow: inset 0 0 0 999px rgba(255,193,7,.26); }
 
 /* form causale su periodo (clic sul nome) */
 .menu-campo { display: grid; gap: 4px; font-size: .8rem; font-weight: 700; color: var(--scuro); margin: 6px 0; }
 .menu-campo select, .menu-campo input { padding: 7px 8px; border: 1px solid var(--bordo); border-radius: 8px; font-family: inherit; font-size: .9rem; }
 #nome-causale-ok { width: 100%; margin-top: 6px; }
+
+/* pulsante Sala Operativa */
+button.verde { background: linear-gradient(135deg, #1f9d55, #34c377); border: none; color: #fff; font-weight: 700; }
+button.verde:hover { box-shadow: 0 4px 14px rgba(31,157,85,.4); }

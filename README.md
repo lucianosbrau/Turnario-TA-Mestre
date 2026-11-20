@@ -27,7 +27,10 @@ Anno di partenza: **2027**.
     a tendina: 1°, 2°, 3° o 4° (i vecchi dati salvati "1".."4" vengono
     convertiti automaticamente).
   - Pulsanti: Presenze, Inserisci personale, Cancella personale, Cambio RP
-    (definitivo, con decorrenza e storico), Esporta backup.
+    (definitivo, con decorrenza e storico), Esporta backup... e in fondo,
+    in verde, **Sala Operativa**: apre una pagina con lo stesso schema del
+    lenzuolo ma limitata al personale con abilitazione SO115 (i riepiloghi
+    di quella pagina arriveranno con le prossime versioni).
   - L'ordine del personale e' automatico (grado e capo turno) in tutta
     l'app, incluso il lenzuolo: nessun pulsante di ordinamento.
 - **Grafica**: font Titillium Web (open source, SIL OFL — è il carattere

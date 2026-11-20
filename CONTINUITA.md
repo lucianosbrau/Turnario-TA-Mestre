@@ -5,7 +5,14 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.13.1. Ultima versione pubblicata: **0.13.1**.
+Data di riferimento: fine v0.14.0. Ultima versione pubblicata: **0.14.0**.
+
+**Sala Operativa (v0.14.0)**: pulsante verde in coda alla barra della home,
+routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
+identico al lenzuolo (mesi, date, D/N, slot, colonna RP del mese, celle
+causali cliccabili) ma righe limitate a chi ha la spunta SO115 in anagrafica;
+toggle "solo attivi" locale (#so-solo-attivi). RIEPILOGHI ANCORA DA
+DEFINIRE con l'utente.
 
 ## 1. Contesto e obiettivo
 
@@ -211,3 +218,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.12.3 | triangolo ▸ di evidenziazione riga nel lenzuolo |
 | v0.13.0 | causale su periodo: calendario + turni in un'unica scheda (no prompt) |
 | v0.13.1 | riga ASSENZE TOTALI (RP+L) gialla con alert 27%, licenze senza alert; bordi riepilogo più marcati; intestazione calendario bloccata allo scroll verticale |
+| v0.14.0 | pulsante verde Sala Operativa: pagina dedicata con lenzuolo limitato al personale SO115 (struttura iniziale; riepiloghi da definire) |
