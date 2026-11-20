@@ -44,6 +44,16 @@ Anno di partenza: **2027**.
   salto A3 (verificata contro il file Excel). Qualsiasi anno, passato o
   futuro, si calcola da qui.
 
+## Aggiornamenti e dati: come non perdere la compilazione
+
+I dati compilati (causali, personale, RP) **vivono nel browser**, separati dal
+codice: un nuovo rilascio li conserva automaticamente. In più:
+- a ogni cambio di versione dell'app viene salvata una **copia di sicurezza
+  interna** dello stato precedente (pulsante "Ripristina copia di sicurezza");
+- l'**esportazione JSON** resta l'assicurazione vera: fai un backup prima di
+  cambiare dispositivo o se cambi l'indirizzo del sito (i dati sono legati
+  all'indirizzo esatto).
+
 ## Tecnica, in breve
 
 - PWA statica: HTML + CSS + JavaScript, nessuna libreria esterna, nessun build.

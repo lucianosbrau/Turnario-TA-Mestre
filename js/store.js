@@ -1,6 +1,6 @@
 // Archivio dati: tutto in locale (localStorage del browser) + backup export/import.
 import { SEED } from "./seed-data.js";
-import { ANNO_DEFAULT } from "./config.js";
+import { ANNO_DEFAULT, APP_VERSION } from "./config.js";
 
 const KEY = "turnario-ta-v1";
 
@@ -15,14 +15,25 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
-      state = JSON.parse(raw);
-      if (!state.settings) { state.settings = { anno: ANNO_DEFAULT }; save(); }
+      // protezione: al primo avvio di una nuova versione dell'app,
+      // salva una copia intatta dell'archivio precedente prima di usarlo
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch { parsed = null; }
+      if (parsed && parsed.__appVersion !== APP_VERSION) {
+        localStorage.setItem(KEY + "-snapshot", raw);
+      }
+      state = parsed || seedInit();
+      state.__appVersion = APP_VERSION;
+      if (!state.settings) { state.settings = { anno: ANNO_DEFAULT }; }
+      save();
     } else {
       state = seedInit();
+      state.__appVersion = APP_VERSION;
       save();
     }
   } catch {
     state = seedInit();
+    state.__appVersion = APP_VERSION;
     save();
   }
 }
@@ -132,6 +143,16 @@ export function importJson(testo) {
   if (!s.rpStorico) s.rpStorico = [];
   state = s;
   save();
+}
+
+// ripristina l'ultima copia di sicurezza (snapshot fatto al cambio versione)
+export function ripristinaSnapshot() {
+  const raw = localStorage.getItem(KEY + "-snapshot");
+  if (!raw) return false;
+  state = JSON.parse(raw);
+  state.__appVersion = APP_VERSION;
+  save();
+  return true;
 }
 
 export function resetToSeed() {
