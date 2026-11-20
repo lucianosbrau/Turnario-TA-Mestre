@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.12.2. Ultima versione pubblicata: **0.12.2**.
+Data di riferimento: fine v0.12.3. Ultima versione pubblicata: **0.12.3**.
 
 ## 1. Contesto e obiettivo
 
@@ -89,6 +89,12 @@ successiva ad oggi, ma **compare solo dopo l'inserimento di una causale**
 (`avvisoDaCausale`), non all'apertura della pagina. Chiuso non ricompare
 finché non si inserisce un'altra causale. Non persiste tra sessioni (nota
 comunicata all'utente, comportamento accettato).
+
+**Evidenziazione righe (v0.12.3)**: accanto a ogni nome del lenzuolo c'e' un
+triangolo ▸; un clic evidenzia quella riga per tutto l'anno in giallo
+trasparente (i colori degli slot restano leggibili sotto; il triangolo
+ruota a ▾), un secondo clic la disattiva; piu' righe insieme. Non
+persiste tra le sessioni. Il clic sul NOME resta per la causale su periodo.
 
 **Riepiloghi a destra del lenzuolo** (per persona): colonne **L,
 L estive, SO, R**. Le vecchie colonne TURNI, RP, MIS, M sono state
@@ -196,3 +202,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.12.0 | home filtrata sul personale in servizio; avviso duplicati |
 | v0.12.1 | recupero dell'omonimo uscito dal turno |
 | v0.12.2 | rimossa la riga "Personale in turno oggi" |
+| v0.12.3 | triangolo ▸ di evidenziazione riga nel lenzuolo |

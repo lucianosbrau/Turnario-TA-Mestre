@@ -283,3 +283,10 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 
 /* filtro personale in servizio nella pagina principale */
 .toggle-home { display: inline-block; margin: 6px 0 10px; font-size: .85rem; font-weight: 700; color: var(--scuro); }
+
+/* evidenziazione di una riga del lenzuolo (triangolo accanto al nome) */
+.evid-riga { border: none; background: none; cursor: pointer; color: #1d6ec8;
+  font-size: .9rem; padding: 0 2px 0 6px; line-height: 1; }
+.evid-riga:hover { color: var(--accento); }
+#lenzuolo tr.evidenziata td { box-shadow: inset 0 0 0 999px rgba(255,193,7,.26); }
+#lenzuolo tr.evidenziata td.critico { box-shadow: inset 0 0 0 999px rgba(255,193,7,.26); }
