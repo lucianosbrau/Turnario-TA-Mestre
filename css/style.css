@@ -80,10 +80,6 @@ section { padding: 18px 22px 40px; max-width: 1700px; margin: 0 auto; }
   background: var(--carta); border: 1px solid var(--bordo); border-radius: 14px;
   padding: 14px 16px; box-shadow: 0 1px 6px rgba(36,49,58,.06);
 }
-.situazione {
-  margin: 12px 4px 0; font-weight: 600; font-size: .92rem; color: var(--scuro);
-}
-.situazione::before { content: "● "; color: var(--accento); }
 .aiuto { font-size: .84rem; color: #5b6b78; max-width: 75em; margin: 10px 4px; }
 h2 { color: var(--scuro); border-left: 4px solid var(--accento); padding-left: 10px; margin: 26px 0 8px; }
 
