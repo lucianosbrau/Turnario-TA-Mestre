@@ -15,8 +15,11 @@ Anno di partenza: **2027**.
     tutto il resto (grado, RP, autista, specializzazioni, date) e'
     facoltativo.
   - Se si salva una persona con cognome e nome gia' presenti in archivio,
-    l'app avvisa; per inserirla comunque chiede di nominarla in modo
-    differente (il nuovo nominativo deve essere a sua volta univoco).
+    l'app avvisa. Se l'omonima e' uscita dal turno, offre di
+    **recuperarla** (torna in servizio, con lo storico presenze intatto);
+    rinunciando al recupero, o se l'omonima e' ancora in servizio, chiede
+    di nominarla in modo differente (il nuovo nominativo deve essere a
+    sua volta univoco).
   - L'elenco della pagina principale mostra di default solo il personale
     in servizio alla data di oggi; togliendo la spunta "Solo personale in
     servizio oggi" compaiono anche le persone uscite.
