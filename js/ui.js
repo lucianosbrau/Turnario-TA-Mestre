@@ -18,6 +18,12 @@ export function init() {
   $("#btn-export").addEventListener("click", esporta);
   $("#btn-import").addEventListener("click", () => $("#file-import").click());
   $("#file-import").addEventListener("change", importa);
+  $("#btn-snapshot").addEventListener("click", () => {
+    if (confirm("Ripristinare l'ultima copia di sicurezza? Le modifiche fatte dopo quella copia andranno perse.")) {
+      if (store.ripristinaSnapshot()) { alert("Copia di sicurezza ripristinata."); render(); }
+      else alert("Nessuna copia di sicurezza presente.");
+    }
+  });
   $("#btn-reset").addEventListener("click", () => {
     if (confirm("Ripristinare i dati iniziali? Tutte le modifiche andranno perse.")) {
       store.resetToSeed();
