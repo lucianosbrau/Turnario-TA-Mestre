@@ -194,3 +194,6 @@ fieldset.spec label { font-size: .8rem; display: flex; gap: 5px; align-items: ce
 .azioni-form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 table.mini td, table.mini th { border: 1px solid var(--bordo); padding: 5px 10px; font-size: .85rem; }
 table.mini button { padding: 4px 10px; font-size: .78rem; }
+
+/* seconda riga di conteggio (senza rinforzi) */
+#lenzuolo tr.effettivi.mstre td { background: #dff0e9; color: #0b4f3f; }

@@ -1,5 +1,5 @@
 // Interfaccia utente: pagina principale (Personale) e pagina Presenze (lenzuolo).
-import { APP_VERSION, CAUSALI, SLOT, SLOT_COLOR, GRADI, AUTISTA, SPEC_FIELDS, MESI } from "./config.js";
+import { APP_VERSION, CAUSALI, SLOT, SLOT_COLOR, GRADI, GRADO_ORDER, AUTISTA, SPEC_FIELDS, MESI } from "./config.js";
 import * as store from "./store.js";
 import { turniAnno, attivoIn, rpEffettivo, valoreCella, presente, effettiviTurno, isoToIt, todayIso, cellKey } from "./engine.js";
 
@@ -46,8 +46,9 @@ function renderHome() {
   $("#anno").value = anno();
   const s = store.getState();
   const oggi = todayIso();
+  const persone = ordinaPersone(s.personale);
   const tb = $("#tabella-personale tbody");
-  tb.innerHTML = s.personale.map((p) => {
+  tb.innerHTML = persone.map((p) => {
     const attivo = attivoIn(p, oggi);
     const storico = (s.rpStorico || []).filter(x => x.p === p.id);
     return `<tr class="${attivo ? "" : "uscito"}">
@@ -73,6 +74,16 @@ function renderHome() {
     `Personale in turno oggi: ${totAtt} su ${s.personale.length}. Persone uscite (storico conservato): ${s.personale.length - totAtt}.`;
 }
 
+function ordinaPersone(arr) {
+  return [...arr].sort((a, b) => {
+    const ga = GRADO_ORDER.indexOf(a.grado), gb = GRADO_ORDER.indexOf(b.grado);
+    const ia = ga === -1 ? 99 : ga, ib = gb === -1 ? 99 : gb;
+    if (ia !== ib) return ia - ib;
+    const ca = a.capoTurno === "Si" ? 0 : 1, cb = b.capoTurno === "Si" ? 0 : 1;
+    if (ca !== cb) return ca - cb;
+    return 0;
+  });
+}
 function apriPersona(id) {
   const s = store.getState();
   const p = id ? s.personale.find(x => x.id === id) : { cognome: "", nome: "", grado: "VF", rp: "A1", capoTurno: "", dal: null, al: null, autista: "", spec: {} };
@@ -203,11 +214,11 @@ function renderPresenze() {
   // persone da mostrare: tutte quelle che hanno avuto a che fare con l'anno,
   // oppure "solo attivi" (default) per la compilazione corrente
   const inizioAnno = `${a}-01-01`, fineAnno = `${a}-12-31`;
-  let persone = s.personale.filter(p => {
+  let persone = ordinaPersone(s.personale.filter(p => {
     const maiAttivo = (!p.dal || p.dal <= fineAnno) && (!p.al || p.al >= inizioAnno);
     const attivoOra = attivoIn(p, todayIso());
     return soloAttivi ? (maiAttivo && attivoOra) : maiAttivo;
-  });
+  }));
 
   // gruppi mensili
   const mesi = [];
@@ -235,7 +246,7 @@ function renderPresenze() {
   html += "<tbody>";
   for (const p of persone) {
     html += `<tr class="${attivoIn(p, todayIso()) ? "" : "gray"}">`;
-    html += `<td class="stick1 nome">${p.cognome} ${p.nome}</td>`;
+    html += `<td class="stick1 nome" data-nome="${p.id}" title="Clicca per assegnare una causale su un periodo">${p.cognome} ${p.nome}</td>`;
     html += `<td class="stick2">${p.grado || ""}</td>`;
     html += `<td class="stick3">${p.autista || ""}</td>`;
     for (const g of mesi) {
@@ -260,11 +271,26 @@ function renderPresenze() {
     html += ["Turni", "RP", "L", "Mis", "M", "SO", "R"].map(k => `<td class="tot">${tot[k]}</td>`).join("");
     html += "</tr>";
   }
-  // riga effettivi
-  html += `<tr class="effettivi"><td class="stick1" colspan="3">EFFETTIVI DI SEDE</td>`;
+  // righe di conteggio in basso
+  html += `<tr class="effettivi"><td class="stick1" colspan="3">PERSONALE IN TURNO</td>`;
   for (const g of mesi) {
     html += `<td class="rpmese"></td>`;
     for (const t of g.turni) html += `<td class="num">${effettiviTurno(s, persone, t, cmap)}</td>`;
+  }
+  html += `<td class="tot" colspan="7"></td></tr>`;
+  html += `<tr class="effettivi mstre"><td class="stick1" colspan="3">PERSONALE MESTRE (senza rinforzi)</td>`;
+  for (const g of mesi) {
+    html += `<td class="rpmese"></td>`;
+    for (const t of g.turni) {
+      let n = 0;
+      for (const p of persone) {
+        if (!attivoIn(p, t.date)) continue;
+        if (!presente(s, p, t, cmap)) continue;
+        if ((cmap[cellKey(p.id, t.date)] || "") === "R") continue;
+        n++;
+      }
+      html += `<td class="num">${n}</td>`;
+    }
   }
   html += `<td class="tot" colspan="7"></td></tr>`;
   html += "</tbody>";
@@ -278,6 +304,9 @@ function renderPresenze() {
   tb.querySelectorAll("[data-eccez]").forEach(td => td.addEventListener("click", () => {
     const [pid, mese] = td.dataset.eccez.split("|");
     menuEccezioneRp(td, pid, mese);
+  }));
+  tb.querySelectorAll("[data-nome]").forEach(td => td.addEventListener("click", () => {
+    menuNomeCausale(td, td.dataset.nome);
   }));
   tb.querySelectorAll("th[data-mese]").forEach(th => th.addEventListener("click", () => {
     th.scrollIntoView({ behavior: "smooth", inline: "start", block: "start" });
@@ -332,12 +361,49 @@ function menuEccezioneRp(anchor, pid, mese) {
   });
 }
 
+// assegna una causale su un periodo, dal menu sulla cella del nome
+function menuNomeCausale(anchor, pid) {
+  chiudiMenu();
+  const menu = document.createElement("div");
+  menu.className = "menu-causale";
+  const r = anchor.getBoundingClientRect();
+  menu.style.left = Math.min(r.left, window.innerWidth - 260) + "px";
+  menu.style.top = (r.bottom + window.scrollY + 2) + "px";
+  menu.innerHTML = `<p class="menu-titolo">Causale per un periodo — ${anchor.textContent.trim()}</p>` +
+    Object.keys(CAUSALI).filter(c => c !== "RP").map(c =>
+      `<button data-c="${c}">${c} — ${CAUSALI[c].label}</button>`).join("") +
+    `<button data-c="" class="ripristina">▪ vuoto (cancella le causali del periodo)</button>`;
+  document.body.appendChild(menu);
+  menu.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-c]");
+    if (!b) return;
+    const codice = b.dataset.c;
+    const a = anno();
+    const da = prompt(`Dal (AAAA-MM-GG) — vuoto per inizio anno ${a}:`, `${a}-01-01`);
+    if (da === null) return;
+    const al = prompt(`Al (AAAA-MM-GG) — vuoto per fine anno ${a}:`, `${a}-12-31`);
+    if (al === null) return;
+    const daIso = da || `${a}-01-01`, alIso = al || `${a}-12-31`;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(daIso) || !/^\d{4}-\d{2}-\d{2}$/.test(alIso)) { alert("Date non valide (formato AAAA-MM-GG)."); return; }
+    let n = 0;
+    for (const t of turniAnno(a)) {
+      if (t.date < daIso || t.date > alIso) continue;
+      store.setCausale(a, pid, t.date, codice);
+      n++;
+    }
+    chiudiMenu();
+    alert(n ? `Causale "${codice || "rimossa"}" applicata a ${n} turni (dal ${daIso} al ${alIso}).` : "Nessun turno in quel periodo.");
+    renderPresenze();
+  });
+}
+
 function chiudiMenu() {
   document.querySelectorAll(".menu-causale").forEach(m => m.remove());
 }
 
 document.addEventListener("click", (e) => {
-  if (!e.target.closest(".menu-causale") && !e.target.closest("[data-cella]") && !e.target.closest("[data-eccez]")) chiudiMenu();
+  if (!e.target.closest(".menu-causale") && !e.target.closest("[data-cella]") &&
+      !e.target.closest("[data-eccez]") && !e.target.closest("[data-nome]")) chiudiMenu();
 });
 
 // toggle "solo attivi"

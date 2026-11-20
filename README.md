@@ -30,8 +30,16 @@ Anno di partenza: **2027**.
     M (malattia), SO (sala operativa), R (rinforzo).
   - La colonna RP di ogni mese permette un cambio di salto turno
     **valido solo per quel mese** (eccezione, non tocca l'archivio).
-  - Totali a destra per persona; in basso la riga EFFETTIVI DI SEDE
-    (celle vuote + SO + R).
+  - I nomi restano fissi mentre si scorre verso destra (colonne fisse).
+  - Causali su un periodo: clicca il NOME della persona e scegli la causale
+    e l'intervallo di date (per un singolo giorno clicca la cella).
+  - Totali a destra per persona; in basso DUE righe di conteggio:
+    PERSONALE IN TURNO (celle vuote + SO + R, riposi e assenze esclusi) e
+    PERSONALE MESTRE (come sopra ma senza i rinforzi R, in servizio
+    presso altre sedi).
+  - Ordine dei nominativi: per grado (CSE, CR, CRE, CS, VC, VE, VF) con il
+    capo turno per primo, come nel foglio Excel; a parita' di grado resta
+    l'ordine di inserimento.
 - **Calendario perenne**: generato dall'ancora 01/09/2026 = turno Diurno,
   salto A3 (verificata contro il file Excel). Qualsiasi anno, passato o
   futuro, si calcola da qui.
