@@ -1,7 +1,7 @@
 // Interfaccia utente: pagina principale (Personale) e pagina Presenze (lenzuolo).
-import { APP_VERSION, CAUSALI, SLOT, GRADI, AUTISTA, SPEC_FIELDS, MESI } from "./config.js";
+import { APP_VERSION, CAUSALI, SLOT, SLOT_COLOR, GRADI, AUTISTA, SPEC_FIELDS, MESI } from "./config.js";
 import * as store from "./store.js";
-import { turniAnno, attivoIn, rpEffettivo, valoreCella, effettiviTurno, isoToIt, todayIso, cellKey } from "./engine.js";
+import { turniAnno, attivoIn, rpEffettivo, valoreCella, presente, effettiviTurno, isoToIt, todayIso, cellKey } from "./engine.js";
 
 const $ = (sel) => document.querySelector(sel);
 const anno = () => store.getState().settings.anno;
@@ -222,13 +222,13 @@ function renderPresenze() {
   let html = "<thead>";
   html += `<tr><th class="stick1" rowspan="4">Persona</th><th class="stick2" rowspan="4">Grado</th><th class="stick3" rowspan="4">Aut</th>`;
   for (const g of mesi) html += `<th class="mese" colspan="${g.turni.length + 1}" data-mese="${g.mese}">${MESI[Number(g.mese.slice(5)) - 1].toUpperCase()}</th>`;
-  html += `<th class="tot" colspan="6">TOT.</th></tr>`;
+  html += `<th class="tot" colspan="7">TOT.</th></tr>`;
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + totHead(["L", "Mis", "M", "SO", "R", "RP"]) + "</tr>";
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + totHead(["Turni", "RP", "L", "Mis", "M", "SO", "R"]) + "</tr>";
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase-${t.phase}">${t.phase}</th>`).join("")).join("") + `<th class="hcell tot" colspan="6"></th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("")).join("") + `<th class="hcell tot" colspan="7"></th></tr>`;
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot">${t.slot}</th>`).join("")).join("") + `<th class="hcell tot" colspan="6"></th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("")).join("") + `<th class="hcell tot" colspan="7"></th></tr>`;
   html += "</thead>";
 
   // corpo
@@ -244,9 +244,7 @@ function renderPresenze() {
       html += `<td class="rpmese ${ex ? "eccezione" : ""}" data-eccez="${p.id}|${g.mese}" title="RP del mese — clicca per cambiarlo solo per questo mese">${rpMese}</td>`;
       for (const t of g.turni) {
         const v = valoreCella(s, p, t, cmap);
-        const colore = (CAUSALI[v]?.colore) || "";
-        html += `<td class="cella v-${v} ${attivoIn(p, t.date) ? "" : "gray"}" data-cella="${p.id}|${t.date}"
-          style="${colore ? `color:${colore}` : ""}" title="${t.date} ${t.phase}"> ${v === "RP" ? "RP" : v} </td>`;
+        html += `<td class="cella v-${v} col${t.slot} ${attivoIn(p, t.date) ? "" : "gray"}" data-cella="${p.id}|${t.date}" title="${t.date} ${t.phase} ${t.slot}">${v === "RP" ? "RP" : v}</td>`;
       }
     }
     const tot = {};
@@ -254,16 +252,21 @@ function renderPresenze() {
       tot[c] = (s.causali?.[a] || []).filter(x => x.p === p.id && x.c === c).length;
     }
     tot.RP = mesi.reduce((n, g) => n + g.turni.filter(t => vIsRP(s, p, t, cmap) && attivoIn(p, t.date)).length, 0);
-    html += ["L", "Mis", "M", "SO", "R", "RP"].map(k => `<td class="tot">${tot[k]}</td>`).join("");
+    tot.Turni = 0;
+    for (const g of mesi) for (const t of g.turni) {
+      if (!attivoIn(p, t.date)) continue;
+      if (presente(s, p, t, cmap)) tot.Turni++;
+    }
+    html += ["Turni", "RP", "L", "Mis", "M", "SO", "R"].map(k => `<td class="tot">${tot[k]}</td>`).join("");
     html += "</tr>";
   }
   // riga effettivi
   html += `<tr class="effettivi"><td class="stick1" colspan="3">EFFETTIVI DI SEDE</td>`;
   for (const g of mesi) {
     html += `<td class="rpmese"></td>`;
-    for (const t of g.turni) html += `<td class="num">${effettiviTurno(persone, t, cmap)}</td>`;
+    for (const t of g.turni) html += `<td class="num">${effettiviTurno(s, persone, t, cmap)}</td>`;
   }
-  html += `<td class="tot" colspan="6"></td></tr>`;
+  html += `<td class="tot" colspan="7"></td></tr>`;
   html += "</tbody>";
   tb.innerHTML = html;
 

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#37474f">
 <title>Turnario Turno A — Portogruaro</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -13,7 +14,11 @@
 <!-- ============ PAGINA PRINCIPALE (Personale) ============ -->
 <section id="pagina-home">
   <header>
-    <h1>Turnario Turno A — Portogruaro</h1>
+    <h1>
+      <img id="logo" src="icons/logo.png" alt="Logo Corpo Nazionale dei Vigili del Fuoco"
+           onerror="this.onerror=null; this.src='icons/icon.svg'; this.classList.add('segnaposto')">
+      Turnario Turno A — Portogruaro
+    </h1>
     <div class="info-versione">
       <span id="versione" class="badge"></span>
       <label>Anno di riferimento
@@ -35,31 +40,34 @@
   <h2>Personale</h2>
   <p class="aiuto">La colonna RP mostra il salto turno attuale di oggi. Quello tra parentesi è l'RP base.
      Chi ha una data di uscita resta in archivio: le sue presenze non si perdono, ma non compare più nella compilazione corrente.</p>
-  <table id="tabella-personale">
-    <thead>
-      <tr><th>Persona</th><th>Grado</th><th>RP</th><th>RP base</th><th>Aut</th><th>Specializzazioni</th><th>Dal</th><th>Al</th><th></th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="tabella-card">
+    <table id="tabella-personale">
+      <thead>
+        <tr><th>Persona</th><th>Grado</th><th>RP</th><th>RP base</th><th>Aut</th><th>Specializzazioni</th><th>Dal</th><th>Al</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </section>
 
 <!-- ============ PAGINA PRESENZE (lenzuolo) ============ -->
 <section id="pagina-presenze" hidden>
   <header class="barra-presenze">
-    <button id="btn-home">← Torna al personale</button>
+    <button id="btn-home">← Personale</button>
     <h2>Presenze <span id="presenze-anno"></span></h2>
-    <label class="toggle"><input type="checkbox" id="solo-attivi" checked> Mostra solo personale in turno</label>
+    <label class="toggle"><input type="checkbox" id="solo-attivi" checked> Solo personale in turno</label>
     <div class="legenda">
-      <span class="lg"><b>RP</b> riposo (calcolato)</span>
+      <span class="lg c-RP"><b>RP</b> riposo</span>
       <span class="lg c-L"><b>L</b> licenza</span>
       <span class="lg c-Mis"><b>Mis</b> missione</span>
       <span class="lg c-M"><b>M</b> malattia</span>
-      <span class="lg c-SO"><b>SO</b> sala operativa</span>
+      <span class="lg c-SO"><b>SO</b> sala op.</span>
       <span class="lg c-R"><b>R</b> rinforzo</span>
     </div>
   </header>
-  <p class="aiuto">Clicca una cella per mettere/togliere una causale. Clicca la colonna <b>RP</b> di un mese
-     per cambiare il salto turno di quella persona <b>solo per quel mese</b> (eccezione che non tocca l'archivio generale).</p>
+  <p class="aiuto">Clicca una cella per mettere/togliere una causale. La riga dei mesi scorre al clic;
+     la colonna <b>RP</b> di ogni mese cambia il salto turno di quella persona <b>solo per quel mese</b>
+     (eccezione che non tocca l'archivio generale). Le colonne sono colorate per salto turno, come nel foglio Excel.</p>
   <div class="lenzuolo-wrap">
     <table id="lenzuolo"></table>
   </div>

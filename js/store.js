@@ -1,5 +1,6 @@
 // Archivio dati: tutto in locale (localStorage del browser) + backup export/import.
 import { SEED } from "./seed-data.js";
+import { ANNO_DEFAULT } from "./config.js";
 
 const KEY = "turnario-ta-v1";
 
@@ -13,16 +14,23 @@ export function getState() {
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    state = raw ? JSON.parse(raw) : seedInit();
+    if (raw) {
+      state = JSON.parse(raw);
+      if (!state.settings) { state.settings = { anno: ANNO_DEFAULT }; save(); }
+    } else {
+      state = seedInit();
+      save();
+    }
   } catch {
     state = seedInit();
+    save();
   }
 }
 
 function seedInit() {
   const s = JSON.parse(JSON.stringify(SEED));
   s.exceptions = s.exceptions || [];
-  s.settings = s.settings || { anno: new Date().getFullYear() };
+  s.settings = s.settings || { anno: ANNO_DEFAULT };
   return s;
 }
 
@@ -119,7 +127,7 @@ export function exportJson() {
 export function importJson(testo) {
   const s = JSON.parse(testo);
   if (!s || !Array.isArray(s.personale)) throw new Error("File non valido");
-  if (!s.settings) s.settings = { anno: new Date().getFullYear() };
+  if (!s.settings) s.settings = { anno: ANNO_DEFAULT };
   if (!s.exceptions) s.exceptions = [];
   if (!s.rpStorico) s.rpStorico = [];
   state = s;

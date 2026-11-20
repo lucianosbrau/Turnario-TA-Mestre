@@ -3,6 +3,7 @@
 Gestione presenze e turni del Turno A di Portogruaro. Sostituisce il foglio
 `Presenze_TurnoA 2026.ods` con una web-app installabile (PWA) che funziona
 anche offline. Tutti i dati restano **sul tuo dispositivo** (nessun server).
+Anno di partenza: **2027**.
 
 ## Come funziona
 
@@ -12,6 +13,16 @@ anche offline. Tutti i dati restano **sul tuo dispositivo** (nessun server).
     periodo di validità (dal / al). Chi esce dal turno resta in archivio.
   - Nuova persona, modifica, cambio RP definitivo con storico e decorrenza.
   - Esporta / Importa backup (file JSON) — fallo con regolarità.
+- **Grafica**: font Titillium Web (open source, SIL OFL — è il carattere
+  tipografico istituzionale usato dal sito dei Vigili del Fuoco), self-hosted
+  in `fonts/` per funzionare offline; colonne del lenzuolo colorate per
+  salto turno con la palette del foglio Excel (A1 lime, A2 giallo, A3 azzurro,
+  A4 rosa, A5 arancio, A6 lilla, A7 teal, A8 grigio).
+- **Logo**: l'app mostra automaticamente `icons/logo.png` se presente; in
+  caso contrario usa il segnaposto. Il logo ufficiale del Corpo ha uno
+  status particolare dicopyright, quindi il file non va committato in un
+  repository pubblico: chi ne ha titolo puo' caricarlo solo nella propria
+  installazione (vedi sotto).
 - **Pagina Presenze (il "lenzuolo")**
   - Tutto l'anno in orizzontale, con scorrimento; i 12 mesi in fila.
   - Le celle RP (riposo) sono calcolate automaticamente dal salto turno.
@@ -42,5 +53,13 @@ all'altro**:
 ## Dati di partenza
 
 `js/seed-data.js` è generato dal foglio `Presenze_TurnoA 2026.ods`
-(personale, causali 2026, storico RP). Il primo avvio carica questi dati;
-dopo, l'app lavora sulla propria copia locale.
+(personale, causali 2026, storico RP). Il primo avvio carica questi dati
+e l'anno 2027; dopo, l'app lavora sulla propria copia locale.
+
+## Logo ufficiale (per l'installazione personale)
+
+Il distintivo del Corpo Nazionale è un emblema istituzionale non libero
+(vedi l'avviso su Wikipedia). Non viene incluso nel repository pubblico;
+chi ha titolo all'uso interno può semplicemente salvare il file del logo come
+`icons/logo.png` accanto all'app: viene mostrato automaticamente in testata
+  al posto del segnaposto, restando locale al proprio dispositivo.
