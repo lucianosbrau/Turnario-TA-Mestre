@@ -12,14 +12,16 @@ routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
 identico al lenzuolo (mesi, date, D/N, slot, colonna RP del mese, celle
 causali cliccabili) ma righe limitate a chi ha la spunta SO115 in anagrafica;
 toggle "solo attivi" locale (#so-solo-attivi). 
-**Regole v0.14.1**: causale ammessa SOLO "SO"; riepilogo "Turni" alla fine di ogni mese
-(personale Mestre = turni in cui e' presente; esterni = turni SO assegnati); unico
-totale a destra = SO annuo; NESSUN alert/banner. Pulsante verde "Aggiungi personale
-di rinforzo": archivio separato `state.soRinforzi` (id "soext-..."): gli esterni
-vivono SOLO in questa pagina (mai in lenzuolo/conteggi/home), si cancellano dal
-loro modale con tutte le causali; divisione piu' spessa (classe so-separatore)
-sopra il primo esterno se sopra c'e' personale Mestre. Inserimento/cancellazione
-del personale da home si riflette qui solo se la persona ha la spunta SO115.
+**Regole v0.14.1/v0.14.2**: causale ammessa SOLO "SO"; riepilogo "Turni SO" alla
+fine di ogni mese = sole causali SO assegnate, per TUTTE le righe (personale Mestre
+ed esterni; nessun effetto sul personale totale); unico totale a destra = SO annuo;
+NESSUN alert/banner. Pulsante verde "Aggiungi personale di rinforzo" (archivio
+separato `state.soRinforzi`, id "soext-...": gli esterni vivono SOLO in questa
+pagina, mai in lenzuolo/conteggi/home, e persistono tra gli anni) e pulsante
+distruttivo "Elimina personale" per la rimozione con spunte (cancella anche le loro
+causali); divisione piu' spessa (classe so-separatore) sopra il primo esterno se
+sopra c'e' personale Mestre. Inserimento/cancellazione del personale da home si
+riflette qui solo se la persona ha la spunta SO115.
 
 ## 1. Contesto e obiettivo
 
