@@ -14,6 +14,12 @@ Anno di partenza: **2027**.
   - Nella scheda persona i campi obbligatori sono solo cognome e nome;
     tutto il resto (grado, RP, autista, specializzazioni, date) e'
     facoltativo.
+  - Se si salva una persona con cognome e nome gia' presenti in archivio,
+    l'app avvisa; per inserirla comunque chiede di nominarla in modo
+    differente (il nuovo nominativo deve essere a sua volta univoco).
+  - L'elenco della pagina principale mostra di default solo il personale
+    in servizio alla data di oggi; togliendo la spunta "Solo personale in
+    servizio oggi" compaiono anche le persone uscite.
   - Tra le specializzazioni di ogni persona c'e' anche **Autista** con menu
     a tendina: 1°, 2°, 3° o 4° (i vecchi dati salvati "1".."4" vengono
     convertiti automaticamente).

@@ -147,7 +147,7 @@ function renderHome() {
   $("#anno").value = anno();
   const s = store.getState();
   const oggi = todayIso();
-  const persone = ordinaPersone(s.personale);
+  const persone = ordinaPersone(soloAttiviHome ? s.personale.filter(p => attivoIn(p, oggi)) : s.personale);
   const tb = $("#tabella-personale tbody");
   tb.innerHTML = persone.map((p) => {
     const attivo = attivoIn(p, oggi);
@@ -221,9 +221,36 @@ function apriPersona(id) {
   $("#fp-annulla").onclick = chiudiModale;
   $("#fp-salva").onclick = () => {
     const f = $("#form-persona");
-    const cognome = f.querySelector('[name="cognome"]').value.trim();
-    const nome = f.querySelector('[name="nome"]').value.trim();
+    let cognome = f.querySelector('[name="cognome"]').value.trim();
+    let nome = f.querySelector('[name="nome"]').value.trim();
     if (!cognome || !nome) { alert("Cognome e nome sono obbligatori."); return; }
+    // se cognome+nome esiste gia' in archivio, chiede di rinominare la nuova persona
+    const esisteGia = (c, n) => store.getState().personale.some(p =>
+      p.id !== id && (p.cognome || "").trim().toLowerCase() === c.toLowerCase() &&
+      (p.nome || "").trim().toLowerCase() === n.toLowerCase());
+    if (esisteGia(cognome, nome)) {
+      const vuoi = confirm(`Attenzione: in archivio esiste già una persona che si chiama ${cognome} ${nome}.
+Se intendi inserire comunque questa persona, devi nominarla in modo differente. Vuoi continuare?`);
+      if (!vuoi) return;
+      let tent = prompt(`Cognome e nome differenti (cognome, spazio, poi nome):`, `${cognome} ${nome} (2)`);
+      while (tent !== null) {
+        const parti = tent.trim().split(/\s+/);
+        if (parti.length < 2) {
+          alert("Indica cognome e nome separati da uno spazio.");
+          tent = prompt(`Cognome e nome differenti (cognome, spazio, poi nome):`, `${cognome} ${nome} (2)`);
+          continue;
+        }
+        const nc = parti[0], nn = parti.slice(1).join(" ");
+        if (esisteGia(nc, nn)) {
+          alert(`Anche ${parti.join(" ")} esiste già in archivio: scegli un nominativo diverso.`);
+          tent = prompt(`Cognome e nome differenti (cognome, spazio, poi nome):`, tent.trim());
+          continue;
+        }
+        cognome = nc; nome = nn;
+        break;
+      }
+      if (tent === null) return;
+    }
     const dati = {
       cognome,
       nome,
@@ -401,6 +428,7 @@ function importa(e) {
 /* ---------------- PRESENZE: il lenzuolo ---------------- */
 
 let soloAttivi = true;
+let soloAttiviHome = true;   // pagina principale: di default solo chi e' in servizio oggi
 
 function renderPresenze() {
   const s = store.getState();
@@ -689,6 +717,10 @@ export function bindPresenze() {
     if (e.target.id === "solo-attivi") {
       soloAttivi = e.target.checked;
       renderPresenze();
+    }
+    if (e.target.id === "solo-attivi-home") {
+      soloAttiviHome = e.target.checked;
+      renderHome();
     }
   });
 }
