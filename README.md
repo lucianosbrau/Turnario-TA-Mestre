@@ -11,8 +11,9 @@ Anno di partenza: **2027**.
   - Anno di riferimento: resta memorizzato tra una sessione e l'altra.
   - Elenco del personale con grado, RP (salto turno), specializzazioni e
     periodo di validità (dal / al). Chi esce dal turno resta in archivio.
-  - Nuova persona, modifica, cambio RP definitivo con storico e decorrenza.
-  - Esporta / Importa backup (file JSON) — fallo con regolarità.
+  - Pulsanti: Presenze, Inserisci personale, Cancella personale, Cambio RP
+    (definitivo, con decorrenza e storico), Ordina personale (l'ordine per
+    grado e' comunque automatico a ogni inserimento), Esporta backup.
 - **Grafica**: font Titillium Web (open source, SIL OFL — è il carattere
   tipografico istituzionale usato dal sito dei Vigili del Fuoco), self-hosted
   in `fonts/` per funzionare offline; colonne del lenzuolo colorate per
