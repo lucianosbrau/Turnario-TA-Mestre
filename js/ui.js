@@ -43,6 +43,10 @@ export function init() {
   };
   sync.onStatus(mostraStatoSync);
   aggiornaPannelloSync();
+  $("#chiudi-modale").addEventListener("click", chiudiModale);
+  $("#modale").addEventListener("click", (e) => {
+    if (e.target.id === "modale") chiudiModale();   // clic sul fondo scuro chiude la scheda
+  });
   window.addEventListener("hashchange", mostraPagina);
   mostraPagina();
   sync.avvio(
@@ -597,20 +601,22 @@ function menuNomeCausale(anchor, pid) {
     if (!b) return;
     const codice = b.dataset.c;
     const a = anno();
-    const da = prompt(`Dal (AAAA-MM-GG) — vuoto per inizio anno ${a}:`, `${a}-01-01`);
+    const turni = turniAnno(a);
+    const da = prompt(`Data di inizio (AAAA-MM-GG):`, `${a}-01-01`);
     if (da === null) return;
-    const al = prompt(`Al (AAAA-MM-GG) — vuoto per fine anno ${a}:`, `${a}-12-31`);
-    if (al === null) return;
-    const daIso = da || `${a}-01-01`, alIso = al || `${a}-12-31`;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(daIso) || !/^\d{4}-\d{2}-\d{2}$/.test(alIso)) { alert("Date non valide (formato AAAA-MM-GG)."); return; }
-    let n = 0;
-    for (const t of turniAnno(a)) {
-      if (t.date < daIso || t.date > alIso) continue;
-      store.setCausale(a, pid, t.date, codice);
-      n++;
-    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(da)) { alert("Data non valida (formato AAAA-MM-GG)."); return; }
+    const qta = prompt("Quanti turni (consecutivi)?", "1");
+    if (qta === null) return;
+    const nTurni = parseInt(qta, 10);
+    if (!Number.isFinite(nTurni) || nTurni < 1) { alert("Numero di turni non valido."); return; }
+    // primo turno che cade alla data indicata o dopo
+    let i0 = turni.findIndex(t => t.date >= da);
+    if (i0 < 0) { chiudiMenu(); alert("Nessun turno a partire da quella data (fine anno)."); return; }
+    if (i0 + nTurni > turni.length) { chiudiMenu(); alert(`Da quella data restano solo ${turni.length - i0} turni: riprova con un numero piu' basso.`); return; }
+    for (let i = i0; i < i0 + nTurni; i++) store.setCausale(a, pid, turni[i].date, codice);
     chiudiMenu();
-    alert(n ? `Causale "${codice || "rimossa"}" applicata a ${n} turni (dal ${daIso} al ${alIso}).` : "Nessun turno in quel periodo.");
+    const fino = turni[i0 + nTurni - 1];
+    alert(`Causale "${codice || "rimossa"}" su ${nTurni} turn${nTurni === 1 ? "o" : "i"}: da ${turni[i0].date} a ${fino.date}.`);
     renderPresenze();
   });
 }

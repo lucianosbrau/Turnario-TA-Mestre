@@ -32,8 +32,10 @@ Anno di partenza: **2027**.
   - La colonna RP di ogni mese permette un cambio di salto turno
     **valido solo per quel mese** (eccezione, non tocca l'archivio).
   - I nomi restano fissi mentre si scorre verso destra (colonne fisse).
-  - Causali su un periodo: clicca il NOME della persona e scegli la causale
-    e l'intervallo di date (per un singolo giorno clicca la cella).
+  - Causali su piu' turni: clicca il NOME della persona, scegli la causale,
+    la DATA DI INIZIO e QUANTI TURNI consecutivi (per un singolo giorno resta
+    il clic sulla cella). Se la data indicata non e' un giorno di turno, la
+    causale parte dal primo turno utile.
   - Totali a destra per persona; in basso DUE righe di conteggio:
     PERSONALE IN TURNO (celle vuote + SO + R, riposi e assenze esclusi) e
     PERSONALE MESTRE (come sopra ma senza i rinforzi R, in servizio
