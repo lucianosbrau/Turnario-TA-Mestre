@@ -27,7 +27,12 @@ Anno di partenza: **2027**.
     a tendina: 1°, 2°, 3° o 4° (i vecchi dati salvati "1".."4" vengono
     convertiti automaticamente).
   - Pulsanti: Presenze, Inserisci personale, Cancella personale, Cambio RP
-    (definitivo, con decorrenza e storico), Esporta backup... e in fondo,
+    (definitivo, con decorrenza e storico), Esporta backup.
+  - "Esporta backup" apre una scheda dove scegliere ** quali fogli**
+    mandare in **Excel** (Presenze e/o Sala Operativa, dell'anno
+    selezionato: file .xml apribile da Excel con le righe, le causali e le
+    righe di conteggio) e dove resta disponibile anche il **backup JSON**
+    completo (quello da usare per l'Importa)... e in fondo,
     in verde, **Sala Operativa**: apre una pagina con lo stesso schema del
     lenzuolo ma limitata al personale con abilitazione SO115 (i riepiloghi
     di quella pagina arriveranno con le prossime versioni).

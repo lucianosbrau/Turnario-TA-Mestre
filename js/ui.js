@@ -497,11 +497,181 @@ function apriCambioRp() {
 }
 
 function esporta() {
-  const blob = new Blob([store.exportJson()], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `turnario-ta-backup-${todayIso()}.json`;
-  a.click();
+  $("#form-persona").innerHTML = `
+    <h3>Esporta</h3>
+    <p class="aiuto">Scegli cosa esportare in <b>Excel</b> (si apre in Excel; le righe e i riepiloghi sono
+    quelli dell'anno selezionato in alto). Il backup <b>JSON</b> resta quello completo di tutto l'archivio,
+    da usare per l'import.</p>
+    <div class="canc-lista">
+      <label class="canc-riga"><input type="checkbox" id="exp-presenze" checked> Foglio Presenze (lenzuolo e conteggi)</label>
+      <label class="canc-riga"><input type="checkbox" id="exp-so" checked> Foglio Sala Operativa (operatori SO115 e rinforzi esterni)</label>
+    </div>
+    <div class="azioni-form">
+      <button id="exp-ok" class="verde">Esporta Excel</button>
+      <button id="exp-json">Esporta backup JSON</button>
+      <button id="fp-annulla">Chiudi</button>
+    </div>`;
+  $("#modale").style.display = "flex";
+  $("#fp-annulla").onclick = chiudiModale;
+  $("#exp-ok").onclick = () => {
+    const pagine = [];
+    if ($("#exp-presenze")?.checked) pagine.push("presenze");
+    if ($("#exp-so")?.checked) pagine.push("so");
+    if (!pagine.length) { alert("Scegli almeno un foglio (Presenze o Sala Operativa)."); return; }
+    const xml = esportaExcel(pagine);
+    const blob = new Blob([xml], { type: "application/xml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `turnario-${anno()}-esportazione.xml`;
+    a.click();
+    chiudiModale();
+  };
+  $("#exp-json").onclick = () => {
+    const blob = new Blob([store.exportJson()], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `turnario-ta-backup-${todayIso()}.json`;
+    a.click();
+    chiudiModale();
+  };
+}
+
+/* ---- esportazione Excel (XML nativo di Excel, nessuna libreria) ---- */
+
+function xmlEsc(t) {
+  return String(t ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function xmlCella(v, stile) {
+  if (v === "" || v === null || v === undefined) return "<Cell/>";
+  const s = stile ? ` ss:StyleID="${stile}"` : "";
+  const isNum = typeof v === "number";
+  return `<Cell${s}><Data ss:Type="${isNum ? "Number" : "String"}">${xmlEsc(v)}</Data></Cell>`;
+}
+
+function grpcell(v) {
+  const isNum = typeof v === "number";
+  return `<Cell><Data ss:Type="${isNum ? "Number" : "String"}">${xmlEsc(v)}</Data></Cell>`;
+}
+
+function esportaExcel(pagine) {
+  const s = store.getState();
+  const a = anno();
+  const turni = turniAnno(a);
+  const cmap = store.mappaCausali(a);
+  const oggi = todayIso();
+  const mesi = [];
+  for (const t of turni) {
+    let g = mesi.find(m => m.mese === t.month);
+    if (!g) { g = { mese: t.month, turni: [] }; mesi.push(g); }
+    g.turni.push(t);
+  }
+
+  const foglioRighe = [];
+
+  if (pagine.includes("presenze")) {
+    const righe = [];
+    // testata: mesi
+    righe.push(["Persona", "Grado", "Aut", ...mesi.flatMap(g => [g.mese, ...g.turni.map(() => "")]), "L", "L estive", "R"]);
+    righe.push(["", "", "", ...mesi.flatMap(g => ["RP"].concat(g.turni.map(t => Number(t.date.slice(8))))), "", "", ""]);
+    righe.push(["", "", "", ...mesi.flatMap(g => [""].concat(g.turni.map(t => t.phase))), "", "", ""]);
+    righe.push(["", "", "", ...mesi.flatMap(g => [""].concat(g.turni.map(t => t.slot))), "", "", ""]);
+    const inizioAnno = `${a}-01-01`, fineAnno = `${a}-12-31`;
+    let personeVisibili = ordinaPersone(s.personale.filter(p => (!p.dal || p.dal <= fineAnno) && (!p.al || p.al >= inizioAnno)));
+    if (soloAttivi) personeVisibili = personeVisibili.filter(p => attivoIn(p, oggi));
+    for (const p of personeVisibili) {
+      const riga = [`${p.cognome} ${p.nome}`, p.grado || "", p.autista || ""];
+      let totL = 0, totR = 0, totLE = 0;
+      const mesiEstivi = [`${a}-06`, `${a}-07`, `${a}-08`, `${a}-09`];
+      for (const g of mesi) {
+        riga.push(rpEffettivo(s, p.id, g.mese + "-01"));
+        for (const t of g.turni) {
+          const v = valoreCella(s, p, t, cmap);
+          riga.push(v === "RP" ? "RP" : v);
+          if (!attivoIn(p, t.date)) continue;
+          const c = cmap[cellKey(p.id, t.date)] || "";
+          if (c === "L") { totL++; if (mesiEstivi.includes(g.mese)) totLE++; }
+          if (c === "R") totR++;
+        }
+      }
+      riga.push(totL, totLE, totR);
+      righe.push(riga);
+    }
+    // righe di conteggio
+    const GRADI_CAPI = ["CS", "CSE", "CR", "CRE"];
+    const ctr = [
+      ["PERSONALE IN TURNO", (p, t) => presente(s, p, t, cmap)],
+      ["PERSONALE MESTRE (senza rinforzi)", (p, t) => presente(s, p, t, cmap) && (cmap[cellKey(p.id, t.date)] || "") !== "R"],
+      ["ASSENZE TOTALI (RP + L)", (p, t) => { const c = cmap[cellKey(p.id, t.date)] || ""; return c === "L" || (c === "" && rpEffettivo(s, p.id, t.date) === t.slot); }],
+      ["LICENZE (L)", (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "L"],
+      ["RINFORZI (R)", (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "R"],
+      ["IN RP (riposo)", (p, t) => { const c = cmap[cellKey(p.id, t.date)] || ""; return c === "" && rpEffettivo(s, p.id, t.date) === t.slot; }],
+      ["AUTISTI (3° e 4°)", (p, t) => (p.autista === "3°" || p.autista === "4°") && presenteSede(s, p, t, cmap)],
+      ["CAPI", (p, t) => GRADI_CAPI.includes(p.grado) && presenteSede(s, p, t, cmap)],
+      ["AS presenti", (p, t) => p.spec?.AS === "Si" && presenteSede(s, p, t, cmap)],
+      ["AG presenti", (p, t) => p.spec?.AG === "Si" && presenteSede(s, p, t, cmap)],
+      ["SO115 presenti", (p, t) => p.spec?.SO115 === "Si" && presenteSede(s, p, t, cmap)],
+    ];
+    for (const [lbl, fn] of ctr) {
+      const riga = [lbl, "", ""];
+      for (const g of mesi) {
+        riga.push("");
+        for (const t of g.turni) {
+          let n = 0;
+          for (const p of personeVisibili) if (attivoIn(p, t.date) && fn(p, t)) n++;
+          riga.push(n);
+        }
+      }
+      riga.push("", "", "");
+      righe.push(riga);
+    }
+    foglioRighe.push({ nome: "Presenze", righe });
+  }
+
+  if (pagine.includes("so")) {
+    const righe = [];
+    righe.push(["Persona", "Grado", "Aut", "Esterno", ...mesi.flatMap(g => [g.mese, ...g.turni.map(() => "")]), "Tot SO"]);
+    righe.push(["", "", "", "", ...mesi.flatMap(g => ["RP"].concat(g.turni.map(t => Number(t.date.slice(8))))), ""]);
+    righe.push(["", "", "", "", ...mesi.flatMap(g => [""].concat(g.turni.map(t => t.phase))), ""]);
+    righe.push(["", "", "", "", ...mesi.flatMap(g => [""].concat(g.turni.map(t => t.slot))), ""]);
+    const inizioAnno = `${a}-01-01`, fineAnno = `${a}-12-31`;
+    let persone = ordinaPersone(s.personale.filter(p => p.spec?.SO115 === "Si" && (!p.dal || p.dal <= fineAnno) && (!p.al || p.al >= inizioAnno)));
+    if ($("#so-solo-attivi")?.checked === true) persone = persone.filter(p => attivoIn(p, oggi));
+   const rigaPersona = (p, esterno) => {
+      const riga = [`${p.cognome} ${p.nome}`, p.grado || "", !esterno ? (p.autista || "") : "", esterno ? "SI" : ""];
+      let totSO = 0;
+      for (const g of mesi) {
+        riga.push(esterno ? (p.rp || "") : rpEffettivo(s, p.id, g.mese + "-01"));
+        for (const t of g.turni) {
+          let v = esterno ? (cmap[cellKey(p.id, t.date)] || "") : valoreCella(s, p, t, cmap);
+          if (esterno && !v && p.rp && t.slot === p.rp) v = "RP";
+          if (v === "SO") totSO++;
+          riga.push(v === "RP" ? "RP" : v);
+        }
+      }
+      riga.push(totSO);
+      return riga;
+    };
+    for (const p of persone) righe.push(rigaPersona(p, false));
+    righe.push(["--- Rinforzi esterni ---"]);
+    for (const p of (s.soRinforzi || [])) righe.push(rigaPersona(p, true));
+    foglioRighe.push({ nome: "Sala Operativa", righe });
+  }
+
+  const fogliXml = foglioRighe.map(f => {
+    const righeXml = f.righe.map(r => `<Row>${r.map(v => grpcell(v)).join("")}</Row>`).join("");
+    return `<Worksheet ss:Name="${xmlEsc(f.nome)}"><Table>${righeXml}</Table></Worksheet>`;
+  }).join("");
+
+  return `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="rp"><Font ss:Bold="1"/></Style>
+ </Styles>
+${fogliXml}
+</Workbook>`;
 }
 
 function importa(e) {
