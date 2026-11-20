@@ -170,9 +170,6 @@ function renderHome() {
   tb.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => apriPersona(b.dataset.edit)));
   tb.querySelectorAll("[data-stor]").forEach(b => b.addEventListener("click", () => apriStorico(b.dataset.stor)));
   $("#btn-nuova-persona").onclick = () => apriPersona(null);
-  const totAtt = s.personale.filter(p => attivoIn(p, oggi)).length;
-  $("#situazione").textContent =
-    `Personale in turno oggi: ${totAtt} su ${s.personale.length}. Persone uscite (storico conservato): ${s.personale.length - totAtt}.`;
 }
 
 function ordinaPersone(arr) {
