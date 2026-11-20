@@ -241,8 +241,7 @@ function apriPersona(id) {
     chiudiModale();
     renderHome();
   };
-  if (id) $("#fp-elimina").onclick = async () => {
-    if (!(await chiediPassword("Per cancellare una persona serve la password di accesso."))) return;
+  if (id) $("#fp-elimina").onclick = () => {
     if (confirm("Eliminare definitivamente questa persona e tutte le sue presenze?")) {
       store.deletePerson(id);
       chiudiModale();
@@ -292,15 +291,6 @@ function apriStorico(id) {
 
 function chiudiModale() { $("#modale").style.display = "none"; }
 
-// chiede la password di accesso per le operazioni delicate (es. cancellazione personale)
-async function chiediPassword(messaggio) {
-  const pw = prompt(messaggio);
-  if (pw === null) return false;
-  const ok = await lock.verificaPassword(pw);
-  if (!ok) alert("Password errata: operazione annullata.");
-  return ok;
-}
-
 function apriCancellaPersona() {
   const s = store.getState();
   const persone = ordinaPersone(s.personale);
@@ -317,11 +307,10 @@ function apriCancellaPersona() {
     </div>`;
   $("#modale").style.display = "flex";
   $("#fp-annulla").onclick = chiudiModale;
-  $("#canc-ok").onclick = async () => {
+  $("#canc-ok").onclick = () => {
     const id = $("#canc-pers").value;
     const p = s.personale.find(x => x.id === id);
     if (!p) return;
-    if (!(await chiediPassword("Per cancellare una persona serve la password di accesso."))) return;
     if (confirm(`Confermi la cancellazione di ${p.cognome} ${p.nome}? L'operazione elimina anche tutte le sue presenze e non si puo' annullare.`)) {
       store.deletePerson(id);
       chiudiModale();
