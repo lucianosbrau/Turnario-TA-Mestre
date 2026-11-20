@@ -10,38 +10,25 @@ const anno = () => store.getState().settings.anno;
 
 export function init() {
   $("#versione").textContent = "v" + APP_VERSION;
-  $("#anno").value = anno();
-  $("#anno").addEventListener("change", (e) => {
+  const sel = $("#anno");
+  const corrente = anno();
+  let opzioni = "";
+  for (let a = corrente - 3; a <= corrente + 10; a++) opzioni += `<option value="${a}">${a}</option>`;
+  sel.innerHTML = opzioni;
+  sel.value = String(corrente);
+  sel.addEventListener("change", (e) => {
     store.setAnno(Number(e.target.value));
     render();
   });
   $("#btn-presenze").addEventListener("click", () => { location.hash = "#presenze"; });
   $("#btn-home").addEventListener("click", () => { location.hash = "#"; });
   $("#btn-export").addEventListener("click", esporta);
-  $("#btn-import").addEventListener("click", () => $("#file-import").click());
-  $("#file-import").addEventListener("change", importa);
-  $("#btn-cambia-pass").onclick = async () => {
-    const vecchia = prompt("Password attuale:");
-    if (vecchia === null) return;
-    const nuova = prompt("Nuova password (minimo 4 caratteri):");
-    if (nuova === null) return;
-    try {
-      await lock.cambiaPassword(vecchia, nuova);
-      alert("Password aggiornata.");
-    } catch (e) { alert(e.message); }
+  $("#btn-cancella-persona").onclick = apriCancellaPersona;
+  $("#btn-cambio-rp").onclick = apriCambioRp;
+  $("#btn-ordina").onclick = () => {
+    renderHome();
+    alert("Personale ordinato per grado (CSE → CR → CRE → CS → VC → VE → VF, capo turno per primo).\nL'ordine viene applicato in automatico anche dopo ogni nuovo inserimento.");
   };
-  $("#btn-snapshot").addEventListener("click", () => {
-    if (confirm("Ripristinare l'ultima copia di sicurezza? Le modifiche fatte dopo quella copia andranno perse.")) {
-      if (store.ripristinaSnapshot()) { alert("Copia di sicurezza ripristinata."); render(); }
-      else alert("Nessuna copia di sicurezza presente.");
-    }
-  });
-  $("#btn-reset").addEventListener("click", () => {
-    if (confirm("Ripristinare i dati iniziali? Tutte le modifiche andranno perse.")) {
-      store.resetToSeed();
-      render();
-    }
-  });
   sync.onStatus(mostraStatoSync);
   aggiornaPannelloSync();
   window.addEventListener("hashchange", mostraPagina);
@@ -278,6 +265,81 @@ function apriStorico(id) {
 }
 
 function chiudiModale() { $("#modale").style.display = "none"; }
+
+function apriCancellaPersona() {
+  const s = store.getState();
+  const persone = ordinaPersone(s.personale);
+  $("#form-persona").innerHTML = `
+    <h3>Cancella personale</h3>
+    <p class="aiuto">La persona viene rimossa dall'archivio insieme alle sue presenze e al suo RP.
+    Se invece e' solo uscita dal turno, meglio metterle una data di uscita (dal pulsante Modifica): le presenze restano nello storico.</p>
+    <label class="campo">Persona da cancellare
+      <select id="canc-pers">${persone.map(p => `<option value="${p.id}">${p.cognome} ${p.nome} (${p.grado})</option>`).join("")}</select>
+    </label>
+    <div class="azioni-form">
+      <button id="canc-ok" class="distruttivo">Cancella definitivamente</button>
+      <button id="fp-annulla">Annulla</button>
+    </div>`;
+  $("#modale").style.display = "flex";
+  $("#fp-annulla").onclick = chiudiModale;
+  $("#canc-ok").onclick = () => {
+    const id = $("#canc-pers").value;
+    const p = s.personale.find(x => x.id === id);
+    if (!p) return;
+    if (confirm(`Confermi la cancellazione di ${p.cognome} ${p.nome}? L'operazione elimina anche tutte le sue presenze e non si puo' annullare.`)) {
+      store.deletePerson(id);
+      chiudiModale();
+      renderHome();
+      alert("Persona cancellata.");
+    }
+  };
+}
+
+function apriCambioRp() {
+  const s = store.getState();
+  const persone = ordinaPersone(s.personale);
+  $("#form-persona").innerHTML = `
+    <h3>Cambio RP (salto turno)</h3>
+    <p class="aiuto">Cambio definitivo con decorrenza: da quella data la persona segue il nuovo salto turno.
+    Per un cambio che vale solo per un mese, apri la pagina Presenze e clicca la colonna RP del mese.</p>
+    <label class="campo">Persona
+      <select id="rp-pers">${persone.map(p => `<option value="${p.id}">${p.cognome} ${p.nome} — RP attuale ${p.rp}</option>`).join("")}</select>
+    </label>
+    <label class="campo">Nuovo RP
+      <select id="rp-nuovo">${SLOT.map(a => `<option>${a}</option>`).join("")}</select>
+    </label>
+    <label class="campo">Decorrenza (primo giorno col nuovo RP)
+      <input type="date" id="rp-dal" value="${anno()}-01-01">
+    </label>
+    <label class="campo solo-lettura">RP attuale della persona selezionata: <b id="rp-attuale"></b></label>
+    <div class="azioni-form">
+      <button id="rp-ok">Applica cambio RP</button>
+      <button id="fp-annulla">Annulla</button>
+    </div>
+    <details><summary>Storia dei cambi</summary><div id="rp-storia"></div></details>`;
+  $("#modale").style.display = "flex";
+  $("#fp-annulla").onclick = chiudiModale;
+  const mostra = () => {
+    const id = $("#rp-pers").value;
+    const p = s.personale.find(x => x.id === id);
+    $("#rp-attuale").textContent = p ? rpEffettivo(s, id, todayIso()) + " (base " + p.rp + ")" : "";
+    $("#rp-storia").innerHTML = (s.rpStorico || []).filter(x => x.p === id)
+      .map(x => `<p class="aiuto">${x.rp} — dal ${isoToIt(x.dal)} al ${x.al ? isoToIt(x.al) : "in corso"}</p>`)
+      .join("") || "<p class=\"aiuto\">Nessun cambio registrato per questa persona.</p>";
+  };
+  $("#rp-pers").addEventListener("change", mostra);
+  mostra();
+  $("#rp-ok").onclick = () => {
+    const id = $("#rp-pers").value;
+    const nuovo = $("#rp-nuovo").value;
+    const dal = $("#rp-dal").value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dal)) { alert("Decorrenza non valida."); return; }
+    store.cambioRpDefinitivo(id, nuovo, dal);
+    chiudiModale();
+    renderHome();
+    alert("RP aggiornato.");
+  };
+}
 
 function esporta() {
   const blob = new Blob([store.exportJson()], { type: "application/json" });
