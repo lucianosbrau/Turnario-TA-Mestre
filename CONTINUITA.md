@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.15.0. Ultima versione pubblicata: **0.15.0**.
+Data di riferimento: fine v0.15.2. Ultima versione pubblicata: **0.15.2**.
 
 **Sala Operativa (v0.14.0)**: pulsante verde in coda alla barra della home,
 routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
@@ -240,3 +240,5 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.14.1 | sala operativa: solo causale SO, riepiloghi Turni mensili e totale SO, personale di rinforzo esterno confinato, separatore grafico |
 | v0.14.2 | Turni mensili = SO assegnati anche per il personale Mestre; pulsante dedicato 'Elimina personale' per gli esterni (persistono tra gli anni) |
 | v0.15.0 | Presenze senza causale SO e senza colonna SO; SO115 in basso con alert resta; Sala Operativa con RP anagrafica + esterni con solo RP |
+| v0.15.1 | Sala Operativa a larghezza piena (max-width rimosso) |
+| v0.15.2 | CORREZIONE CRITICA CSS: i selettori del lenzuolo, corrotti in v0.14.0 da una sostituzione in blocco errata ('#lenzuolo X' era diventato '#lenzuolo, #lenzuolo-so X',applicando le regole a TUTTA la tabella e perdendo i colori delle celle: pagina rosa/rossa, evidenziazione rotta), sono stati rigenerati dalla v0.13.1 estendendoli correttamente a #lenyuolo-so a coppie complete |
