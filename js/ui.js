@@ -444,7 +444,8 @@ function importa(e) {
 /* ---------------- PRESENZE: il lenzuolo ---------------- */
 
 let soloAttivi = true;
-let soloAttiviHome = true;   // pagina principale: di default solo chi e' in servizio oggi
+let soloAttiviHome = true;
+const evidenziati = new Set();   // righe evidenziate nel lenzuolo (per sessione)   // pagina principale: di default solo chi e' in servizio oggi
 
 function renderPresenze() {
   const s = store.getState();
@@ -487,8 +488,8 @@ function renderPresenze() {
   // corpo
   html += "<tbody>";
   for (const p of persone) {
-    html += `<tr class="${attivoIn(p, todayIso()) ? "" : "gray"}">`;
-    html += `<td class="stick1 nome" data-nome="${p.id}" title="Clicca per assegnare una causale su un periodo">${p.cognome} ${p.nome}</td>`;
+    html += `<tr class="${attivoIn(p, todayIso()) ? "" : "gray"}${evidenziati.has(p.id) ? " evidenziata" : ""}">`;
+    html += `<td class="stick1 nome" data-nome="${p.id}" title="Clicca per assegnare una causale su un periodo">${p.cognome} ${p.nome}<button class="evid-riga" data-evid="${p.id}" title="Evidenzia tutta la riga">${evidenziati.has(p.id) ? "▾" : "▸"}</button></td>`;
     html += `<td class="stick2">${p.grado || ""}</td>`;
     html += `<td class="stick3">${p.autista || ""}</td>`;
     for (const g of mesi) {
@@ -592,6 +593,12 @@ function renderPresenze() {
   tb.querySelectorAll("[data-eccez]").forEach(td => td.addEventListener("click", () => {
     const [pid, mese] = td.dataset.eccez.split("|");
     menuEccezioneRp(td, pid, mese);
+  }));
+  tb.querySelectorAll("[data-evid]").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const id = b.dataset.evid;
+    if (evidenziati.has(id)) evidenziati.delete(id); else evidenziati.add(id);
+    renderPresenze();
   }));
   tb.querySelectorAll("[data-nome]").forEach(td => td.addEventListener("click", () => {
     menuNomeCausale(td, td.dataset.nome);
