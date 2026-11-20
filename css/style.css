@@ -121,6 +121,7 @@ td.aut { text-align: center; }
 .lenzuolo-wrap { overflow: auto; max-height: calc(100vh - 150px); border-radius: 14px; background: #fff; box-shadow: 0 1px 8px rgba(36,49,58,.08); border: 1px solid var(--bordo); }
 #lenzuolo th, #lenzuolo td { border: 1px solid #e3e8ec; padding: 3px 5px; text-align: center; white-space: nowrap; font-size: .76rem; }
 #lenzuolo thead th { position: sticky; font-weight: 600; background: #f6f8fa; z-index: 2; }
+#lenzuolo thead { position: sticky; top: 0; z-index: 4; }
 #lenzuolo thead th.stick1, #lenzuolo thead th.stick2, #lenzuolo thead th.stick3 { z-index: 5; }
 #lenzuolo th.mese {
   background: var(--grigio); color: var(--scuro); cursor: pointer;
@@ -141,7 +142,9 @@ td.aut { text-align: center; }
 #lenzuolo td.cella.v-M { background: #f6d7d5; color: #a51208; }
 #lenzuolo td.cella.v-SO { background: #e9dcf5; color: #54107e; }
 #lenzuolo td.cella.v-R { background: #d3eef1; color: #005661; }
-#lenzuolo tr.effettivi td { background: #e8f0e8; font-weight: 700; }
+#lenzuolo tr.effettivi td { background: #e8f0e8; font-weight: 700; border-color: #b9c4cc; }
+#lenzuolo tr.effettivi.assenzetot td { background: #ffe28a; color: #5a4300; }
+#lenzuolo tr.effettivi.assenzetot td.num.critico { background: #ff9999 !important; color: #7a1010; }
 
 /* tinte delle colonne per salto turno (palette dell'Excel) */
 .cella.colA1:not(.v-RP):not(.v-L):not(.v-Mis):not(.v-M):not(.v-SO):not(.v-R) { background: #f6fceb; }

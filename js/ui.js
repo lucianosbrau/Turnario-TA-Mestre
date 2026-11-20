@@ -538,10 +538,15 @@ function renderPresenze() {
   // righe di dettaglio per turno: licenze, rinforzi, riposi, autisti, capi e abilitazioni
   const GRADI_CAPI = ["CS", "CSE", "CR", "CRE"];
   const righeConteggio = [
-    { etichetta: "LICENZE (L)",
-      filtro: (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "L",
+    { etichetta: "ASSENZE TOTALI (RP + L)", classe: "assenzetot",
+      filtro: (p, t) => {
+        const c = cmap[cellKey(p.id, t.date)] || "";
+        return c === "L" || (c === "" && rpEffettivo(s, p.id, t.date) === t.slot);
+      },
       critico: (n, personeTurno) => n > Math.floor(0.27 * personeTurno),
-      motivo: "licenze sopra il 27% del personale in turno" },
+      motivo: "assenze totali (RP+L) oltre il 27% del personale in turno" },
+    { etichetta: "LICENZE (L)",
+      filtro: (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "L" },
     { etichetta: "RINFORZI (R)", filtro: (p, t) => (cmap[cellKey(p.id, t.date)] || "") === "R" },
     { etichetta: "IN RP (riposo)", filtro: (p, t) => {
         const c = cmap[cellKey(p.id, t.date)] || "";
@@ -561,7 +566,7 @@ function renderPresenze() {
   ];
   const criticita = {};   // data -> [motivi]
   for (const riga of righeConteggio) {
-    html += `<tr class="effettivi"><td class="stick1" colspan="3">${riga.etichetta}</td>`;
+    html += `<tr class="effettivi ${riga.classe || ""}"><td class="stick1" colspan="3">${riga.etichetta}</td>`;
     for (const g of mesi) {
       html += `<td class="rpmese"></td>`;
       for (const t of g.turni) {
