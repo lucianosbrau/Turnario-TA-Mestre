@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#37474f">
-<title>Turnario Turno A — Portogruaro</title>
+<title>Turnario TA — Centrale Mestre</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
@@ -29,11 +29,12 @@
   </header>
 
   <p class="azioni-bar">
-    <button id="btn-presenze" class="grande">Presenze — apri il lenzuolo</button>
+    <button id="btn-presenze" class="grande">Presenze</button>
     <button id="btn-nuova-persona">Nuova persona</button>
     <button id="btn-export">Esporta backup</button>
     <button id="btn-import">Importa backup</button>
     <input type="file" id="file-import" accept="application/json,.json" hidden>
+    <button id="btn-cambia-pass">Cambia password di accesso</button>
     <button id="btn-snapshot">Ripristina copia di sicurezza</button>
     <button id="btn-reset" class="distruttivo">Ripristina dati iniziali</button>
   </p>
@@ -80,6 +81,15 @@
 <!-- ============ MODALE ============ -->
 <div id="modale">
   <div id="form-persona" class="modale-box"></div>
+</div>
+
+<!-- ============ SCHERMATA DI BLOCCO ============ -->
+<div id="blocco">
+  <div class="blocco-box">
+    <h1>Turnario TA — Centrale Mestre</h1>
+    <p id="blocco-testo" class="aiuto"></p>
+    <div id="blocco-form" class="form-blocco"></div>
+  </div>
 </div>
 
 <script type="module" src="js/main.js"></script>

@@ -1,6 +1,6 @@
-# Turnario Turno A — Portogruaro (PWA)
+# Turnario TA — Centrale Mestre (PWA)
 
-Gestione presenze e turni del Turno A di Portogruaro. Sostituisce il foglio
+Gestione presenze e turni del Turno TA della Centrale di Mestre. Sostituisce il foglio
 `Presenze_TurnoA 2026.ods` con una web-app installabile (PWA) che funziona
 anche offline. Tutti i dati restano **sul tuo dispositivo** (nessun server).
 Anno di partenza: **2027**.
@@ -43,6 +43,14 @@ Anno di partenza: **2027**.
 - **Calendario perenne**: generato dall'ancora 01/09/2026 = turno Diurno,
   salto A3 (verificata contro il file Excel). Qualsiasi anno, passato o
   futuro, si calcola da qui.
+
+## Password di accesso
+
+Al primo avvio l'app chiede di scegliere una password; alle aperture
+successive la chiede prima di mostrare qualunque dato. Si cambia dalla
+pagina principale ("Cambia password di accesso"). Nota onesta: e' un
+lucchetto di cortesia del dispositivo (protegge da sguardi, non cifra i
+dati del browser).
 
 ## Sincronizzazione tra dispositivi (Supabase)
 
