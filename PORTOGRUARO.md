@@ -51,7 +51,7 @@ criticità, convenzioni di rilascio e pattern di test.
 
 1. **Seed dei dati** (`js/seed-data.js`): personale, specializzazioni,
    autisti, RP, storico RP e causali di Portogruaro dal **suo file Excel**.
-   Il seed di Mestre va cancellato: 35 persone sbagliate herefarebbero
+   Il seed di Mestre va cancellato: 35 persone sbagliate farebbero
    confusione.
 2. **Credenziali**: `SUPABASE_URL` e `SUPABASE_ANON_KEY` in `js/config.js`
    del nuovo progetto Supabase. **Non committare mai** le chiavi di Mestre
