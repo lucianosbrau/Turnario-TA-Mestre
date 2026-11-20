@@ -65,7 +65,7 @@ export function addSoRinforzo(dati) {
   if (!state.soRinforzi) state.soRinforzi = [];
   const p = {
     id: "soext-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7),
-    cognome: dati.cognome, nome: dati.nome, grado: dati.grado || "",
+    cognome: dati.cognome, nome: dati.nome, rp: dati.rp || "",
     esterno: true,
   };
   state.soRinforzi.push(p);

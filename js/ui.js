@@ -219,11 +219,12 @@ function renderSo() {
     r += `<td class="stick3">${!esterno ? (p.autista || "") : ""}</td>`;
     let totSO = 0;
     for (const g of mesi) {
-      const rpMese = esterno ? "" : rpEffettivo(s, p.id, g.mese + "-01");
+      const rpMese = esterno ? (p.rp || "") : rpEffettivo(s, p.id, g.mese + "-01");
       r += `<td class="rpmese">${rpMese}</td>`;
       let turniFatti = 0;
       for (const t of g.turni) {
-        const v = esterno ? (cmap[cellKey(p.id, t.date)] || "") : valoreCella(s, p, t, cmap);
+        let v = esterno ? (cmap[cellKey(p.id, t.date)] || "") : valoreCella(s, p, t, cmap);
+        if (esterno && !v && p.rp && t.slot === p.rp) v = "RP";
         r += `<td class="cella v-${v} col${t.slot} ${!esterno && !attivoIn(p, t.date) ? "gray" : ""}" data-cella="${p.id}|${t.date}" title="${t.date} ${t.phase} ${t.slot}">${v === "RP" ? "RP" : v}</td>`;
         if (v === "SO") { turniFatti++; totSO++; }
       }
@@ -553,13 +554,13 @@ function renderPresenze() {
   let html = "<thead>";
   html += `<tr><th class="stick1" rowspan="4">Persona</th><th class="stick2" rowspan="4">Grado</th><th class="stick3" rowspan="4">Aut</th>`;
   for (const g of mesi) html += `<th class="mese" colspan="${g.turni.length + 1}" data-mese="${g.mese}">${MESI[Number(g.mese.slice(5)) - 1].toUpperCase()}</th>`;
-  html += `<th class="tot" colspan="4">TOT.</th></tr>`;
+  html += `<th class="tot" colspan="3">TOT.</th></tr>`;
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + totHead(["L", "L estive", "SO", "R"]) + "</tr>";
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + totHead(["L", "L estive", "R"]) + "</tr>";
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("")).join("") + `<th class="hcell tot" colspan="4"></th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("")).join("") + `<th class="hcell tot" colspan="3"></th></tr>`;
 
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("")).join("") + `<th class="hcell tot" colspan="4"></th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("")).join("") + `<th class="hcell tot" colspan="3"></th></tr>`;
   html += "</thead>";
 
   // corpo
@@ -579,12 +580,12 @@ function renderPresenze() {
       }
     }
     const tot = {};
-    for (const c of ["L", "SO", "R"]) {
+    for (const c of ["L", "R"]) {
       tot[c] = (s.causali?.[a] || []).filter(x => x.p === p.id && x.c === c).length;
     }
     const mesiEstivi = [`${a}-06`, `${a}-07`, `${a}-08`, `${a}-09`];
     tot["L estive"] = (s.causali?.[a] || []).filter(x => x.p === p.id && x.c === "L" && mesiEstivi.includes((x.d || "").slice(0, 7))).length;
-    html += ["L", "L estive", "SO", "R"].map(k => {
+    html += ["L", "L estive", "R"].map(k => {
       const cls = k === "L estive" ? (tot[k] > 8 ? " tot estive critico" : " tot estive") : " tot";
       return `<td class="${cls.trim()}">${tot[k]}</td>`;
     }).join("");
@@ -596,7 +597,7 @@ function renderPresenze() {
     html += `<td class="rpmese"></td>`;
     for (const t of g.turni) html += `<td class="num">${effettiviTurno(s, persone, t, cmap)}</td>`;
   }
-  html += `<td class="tot" colspan="4"></td></tr>`;
+  html += `<td class="tot" colspan="3"></td></tr>`;
   html += `<tr class="effettivi mstre"><td class="stick1" colspan="3">PERSONALE MESTRE (senza rinforzi)</td>`;
   for (const g of mesi) {
     html += `<td class="rpmese"></td>`;
@@ -611,7 +612,7 @@ function renderPresenze() {
       html += `<td class="num">${n}</td>`;
     }
   }
-  html += `<td class="tot" colspan="4"></td></tr>`;
+  html += `<td class="tot" colspan="3"></td></tr>`;
   // righe di dettaglio per turno: licenze, rinforzi, riposi, autisti, capi e abilitazioni
   const GRADI_CAPI = ["CS", "CSE", "CR", "CRE"];
   const righeConteggio = [
@@ -659,7 +660,7 @@ function renderPresenze() {
         html += `<td class="num ${crit ? "critico" : ""}">${n}</td>`;
       }
     }
-    html += `<td class="tot" colspan="4"></td></tr>`;
+    html += `<td class="tot" colspan="3"></td></tr>`;
   }
   html += "</tbody>";
   // avviso delle criticita' future (dopo oggi), chiudibile con la x
@@ -738,13 +739,13 @@ function apriSoRinforzi() {
     non compaiono da nessun'altra parte (non nel lenzuolo, non nei conteggi, non nella gestione del personale).</p>
     <div class="canc-lista">
       ${esterni.length ? esterni.map(p =>
-        `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (${p.grado || "grado non indicato"})</label>`).join("")
+        `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (RP ${p.rp || "-"})</label>`).join("")
         : `<p class="aiuto">Nessun rinforzo esterno inserito.</p>`}
     </div>
     <div class="griglia-form">
       <label>Cognome<input name="ext-cognome"></label>
       <label>Nome<input name="ext-nome"></label>
-      <label>Grado<select name="ext-grado"><option value=""></option>${GRADI.map(g => `<option>${g}</option>`).join("")}</select></label>
+      <label>RP (salto turno)<select name="ext-rp">${SLOT.map(a => `<option ${a === "A1" ? "selected" : ""}>${a}</option>`).join("")}</select></label>
     </div>
     <div class="azioni-form">
       <button id="ext-add" class="verde">Aggiungi</button>
@@ -757,7 +758,7 @@ function apriSoRinforzi() {
     const cognome = f.querySelector('[name="ext-cognome"]').value.trim();
     const nome = f.querySelector('[name="ext-nome"]').value.trim();
     if (!cognome || !nome) { alert("Cognome e nome sono obbligatori."); return; }
-    store.addSoRinforzo({ cognome, nome, grado: f.querySelector('[name="ext-grado"]').value });
+    store.addSoRinforzo({ cognome, nome, rp: f.querySelector('[name="ext-rp"]').value });
     chiudiModale();
     renderSo();
     alert(`Aggiunto ${cognome} ${nome} ai rinforzi della Sala Operativa.`);
@@ -774,7 +775,7 @@ function apriSoElimina() {
     Il personale di Mestre non si tocca da qui: per quello usare la gestione del personale della pagina principale.</p>
     <div class="canc-lista">
       ${esterni.length ? esterni.map(p =>
-        `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (${p.grado || "grado non indicato"})</label>`).join("")
+        `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (RP ${p.rp || "-"})</label>`).join("")
         : `<p class="aiuto">Nessun rinforzo esterno inserito.</p>`}
     </div>
     <div class="azioni-form">
@@ -803,7 +804,7 @@ function menuCausale(anchor, pid, date, pagina) {
   menu.style.left = Math.min(anchor.getBoundingClientRect().left, window.innerWidth - 180) + "px";
   menu.style.top = anchor.getBoundingClientRect().bottom + window.scrollY + 2 + "px";
   // nella Sala Operativa l'unica causale ammessa e' SO
-  const opzioni = pagina === "so" ? ["", "SO"] : ["", ...Object.keys(CAUSALI).filter(c => c !== "RP")];
+  const opzioni = pagina === "so" ? ["", "SO"] : ["", ...Object.keys(CAUSALI).filter(c => c !== "RP" && c !== "SO")];
   menu.innerHTML = opzioni.map(c =>
     `<button data-c="${c}">${c === "" ? "\u25aa vuoto (in turno)" : c + " \u2014 " + CAUSALI[c].label}</button>`).join("");
   document.body.appendChild(menu);
@@ -850,7 +851,7 @@ function menuNomeCausale(anchor, pid) {
   menu.innerHTML = `<p class="menu-titolo">Causale per un periodo — ${anchor.textContent.trim()}</p>
     <label class="menu-campo">Causale
       <select id="nome-causale">
-        ${Object.keys(CAUSALI).filter(c => c !== "RP").map(c =>
+        ${Object.keys(CAUSALI).filter(c => c !== "RP" && c !== "SO").map(c =>
           `<option value="${c}">${c} — ${CAUSALI[c].label}</option>`).join("")}
         <option value="">▪ vuota (cancella le causali del periodo)</option>
       </select></label>
