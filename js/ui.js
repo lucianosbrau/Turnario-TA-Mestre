@@ -22,6 +22,7 @@ export function init() {
   });
   $("#btn-presenze").addEventListener("click", () => { location.hash = "#presenze"; });
   $("#btn-so").addEventListener("click", () => { location.hash = "#so"; });
+  $("#btn-so-rinforzo").addEventListener("click", () => { apriSoRinforzi(); });
   $("#btn-so-home").addEventListener("click", () => { location.hash = ""; mostraPagina(); });
   $("#btn-home").addEventListener("click", () => { location.hash = "#"; });
   $("#btn-export").addEventListener("click", esporta);
@@ -178,7 +179,7 @@ function renderHome() {
   $("#btn-nuova-persona").onclick = () => apriPersona(null);
 }
 
-/* ---------------- SALA OPERATIVA: lenzuolo solo SO115 ---------------- */
+/* ---------------- SALA OPERATIVA: lenzuolo solo SO115 + rinforzi esterni ---------------- */
 
 function renderSo() {
   const s = store.getState();
@@ -202,36 +203,50 @@ function renderSo() {
   const tb = $("#lenzuolo-so");
   let html = "<thead>";
   html += `<tr><th class="stick1" rowspan="4">Persona</th><th class="stick2" rowspan="4">Grado</th><th class="stick3" rowspan="4">Aut</th>`;
-  for (const g of mesi) html += `<th class="mese" colspan="${g.turni.length + 1}" data-mese="${g.mese}">${MESI[Number(g.mese.slice(5)) - 1].toUpperCase()}</th>`;
-  html += `</tr>`;
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + "</tr>";
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("")).join("") + "</tr>";
-  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("")).join("") + "</tr>";
+  for (const g of mesi) html += `<th class="mese" colspan="${g.turni.length + 2}" data-mese="${g.mese}">${MESI[Number(g.mese.slice(5)) - 1].toUpperCase()}</th>`;
+  html += `<th class="tot" colspan="1">TOT.</th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("") + `<th class="hcell tot">Turni</th>`).join("") + totHead(["SO"]) + "</tr>";
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("") + `<th class="hcell tot"></th>`).join("") + `<th class="hcell tot"></th></tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("") + `<th class="hcell tot"></th>`).join("") + `<th class="hcell tot"></th></tr>`;
   html += "</thead><tbody>";
-  for (const p of persone) {
-    html += `<tr class="${attivoIn(p, todayIso()) ? "" : "gray"}">`;
-    html += `<td class="stick1 nome">${p.cognome} ${p.nome}</td>`;
-    html += `<td class="stick2">${p.grado || ""}</td>`;
-    html += `<td class="stick3">${p.autista || ""}</td>`;
+
+  // righe: personale SO115 di Mestre, poi (con divisione) i rinforzi esterni
+  const rigaPersona = (p, esterno, separatore) => {
+    let r = `<tr class="${attivoIn(p, todayIso()) || esterno ? "" : "gray"}${separatore ? " so-separatore" : ""}">`;
+    r += `<td class="stick1 nome">${esterno ? "\u25b8 " : ""}${p.cognome} ${p.nome}</td>`;
+    r += `<td class="stick2">${p.grado || ""}</td>`;
+    r += `<td class="stick3">${!esterno ? (p.autista || "") : ""}</td>`;
+    let totSO = 0;
     for (const g of mesi) {
-      const rpMese = rpEffettivo(s, p.id, g.mese + "-01");
-      html += `<td class="rpmese">${rpMese}</td>`;
+      const rpMese = esterno ? "" : rpEffettivo(s, p.id, g.mese + "-01");
+      r += `<td class="rpmese">${rpMese}</td>`;
+      let turniFatti = 0;
       for (const t of g.turni) {
-        const v = valoreCella(s, p, t, cmap);
-        html += `<td class="cella v-${v} col${t.slot} ${attivoIn(p, t.date) ? "" : "gray"}" data-cella="${p.id}|${t.date}" title="${t.date} ${t.phase} ${t.slot}">${v === "RP" ? "RP" : v}</td>`;
+        const v = esterno ? (cmap[cellKey(p.id, t.date)] || "") : valoreCella(s, p, t, cmap);
+        r += `<td class="cella v-${v} col${t.slot} ${!esterno && !attivoIn(p, t.date) ? "gray" : ""}" data-cella="${p.id}|${t.date}" title="${t.date} ${t.phase} ${t.slot}">${v === "RP" ? "RP" : v}</td>`;
+        if (v === "SO") { turniFatti++; totSO++; }
       }
+      if (!esterno) turniFatti = g.turni.filter(t => presente(s, p, t, cmap)).length;
+      r += `<td class="tot turni-mese">${turniFatti}</td>`;
     }
-    html += "</tr>";
-  }
+    r += `<td class="tot" title="Turni SO nell'anno">${totSO}</td>`;
+    return r + "</tr>";
+  };
+
+  persone.forEach(p => { html += rigaPersona(p, false, false); });
+  const esterni = (s.soRinforzi || []).slice();
+  esterni.forEach((p, i) => { html += rigaPersona(p, true, i === 0 && persone.length > 0); });
   html += "</tbody>";
   tb.innerHTML = html;
+
   tb.querySelectorAll("[data-cella]").forEach(td => td.addEventListener("click", () => {
     const [pid, date] = td.dataset.cella.split("|");
-    menuCausale(td, pid, date);
+    menuCausale(td, pid, date, "so");
   }));
   tb.querySelectorAll("th[data-mese]").forEach(th => th.addEventListener("click", () => {
     th.scrollIntoView({ behavior: "smooth", inline: "start", block: "start" });
   }));
+
 }
 
 function ordinaPersone(arr) {
@@ -713,21 +728,71 @@ function totHead(labels) {
   return labels.map(l => `<th class="hcell ${l === "L estive" ? "estive" : ""}">${l}</th>`).join("");
 }
 
-function menuCausale(anchor, pid, date) {
+// gestione del personale di rinforzo esterno (solo pagina Sala Operativa)
+function apriSoRinforzi() {
+  const s = store.getState();
+  const esterni = s.soRinforzi || [];
+  $("#form-persona").innerHTML = `
+    <h3>Personale di rinforzo (Sala Operativa)</h3>
+    <p class="aiuto">Queste persone non fanno parte della sede di Mestre: esistono <b>solo in questa pagina</b> e
+    non compaiono da nessun'altra parte (non nel lenzuolo, non nei conteggi, non nella gestione del personale).</p>
+    <div class="canc-lista">
+      ${esterni.length ? esterni.map(p =>
+        `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (${p.grado || "grado non indicato"})</label>`).join("")
+        : `<p class="aiuto">Nessun rinforzo esterno inserito.</p>`}
+    </div>
+    <div class="griglia-form">
+      <label>Cognome<input name="ext-cognome"></label>
+      <label>Nome<input name="ext-nome"></label>
+      <label>Grado<select name="ext-grado"><option value=""></option>${GRADI.map(g => `<option>${g}</option>`).join("")}</select></label>
+    </div>
+    <div class="azioni-form">
+      <button id="ext-add" class="verde">Aggiungi</button>
+      ${esterni.length ? `<button id="ext-del" class="distruttivo">Elimina i selezionati</button>` : ""}
+      <button id="fp-annulla">Chiudi</button>
+    </div>`;
+  $("#modale").style.display = "flex";
+  $("#fp-annulla").onclick = chiudiModale;
+  $("#ext-add").onclick = () => {
+    const f = $("#form-persona");
+    const cognome = f.querySelector('[name="ext-cognome"]').value.trim();
+    const nome = f.querySelector('[name="ext-nome"]').value.trim();
+    if (!cognome || !nome) { alert("Cognome e nome sono obbligatori."); return; }
+    store.addSoRinforzo({ cognome, nome, grado: f.querySelector('[name="ext-grado"]').value });
+    chiudiModale();
+    renderSo();
+    alert(`Aggiunto ${cognome} ${nome} ai rinforzi della Sala Operativa.`);
+  };
+  if (esterni.length) $("#ext-del").onclick = () => {
+    const sel = [...$("#form-persona").querySelectorAll(".canc-lista input:checked")].map(b => b.value);
+    if (!sel.length) { alert("Nessun rinforzo selezionato: metti una spunta accanto al nominativo da eliminare."); return; }
+    const nomi = sel.map(id => { const p = esterni.find(x => x.id === id); return p ? `${p.cognome} ${p.nome}` : ""; }).filter(Boolean);
+    if (confirm(`Confermi l'eliminazione di ${nomi.join(", ")}? Verranno cancellati anche tutti i loro turni SO.`)) {
+      for (const id of sel) store.deleteSoRinforzo(id);
+      chiudiModale();
+      renderSo();
+      alert(`Eliminat${sel.length === 1 ? "o 1 rinforzo esterno" : "i " + sel.length + " rinforzi esterni"}.`);
+    }
+  };
+}
+
+function menuCausale(anchor, pid, date, pagina) {
   chiudiMenu();
   const menu = document.createElement("div");
   menu.className = "menu-causale";
   menu.style.left = Math.min(anchor.getBoundingClientRect().left, window.innerWidth - 180) + "px";
   menu.style.top = anchor.getBoundingClientRect().bottom + window.scrollY + 2 + "px";
-  const opzioni = ["", ...Object.keys(CAUSALI).filter(c => c !== "RP")];
+  // nella Sala Operativa l'unica causale ammessa e' SO
+  const opzioni = pagina === "so" ? ["", "SO"] : ["", ...Object.keys(CAUSALI).filter(c => c !== "RP")];
   menu.innerHTML = opzioni.map(c =>
-    `<button data-c="${c}">${c === "" ? "▪ vuoto (in turno)" : c + " — " + CAUSALI[c].label}</button>`).join("");
+    `<button data-c="${c}">${c === "" ? "\u25aa vuoto (in turno)" : c + " \u2014 " + CAUSALI[c].label}</button>`).join("");
   document.body.appendChild(menu);
   menu.addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b) return;
     store.setCausale(anno(), pid, date, b.dataset.c);
     chiudiMenu();
+    if (pagina === "so") { renderSo(); return; }
     avvisoDaCausale = true; avvisoChiuso = false;
     renderPresenze();
   });

@@ -302,3 +302,7 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 /* pulsante Sala Operativa */
 button.verde { background: linear-gradient(135deg, #1f9d55, #34c377); border: none; color: #fff; font-weight: 700; }
 button.verde:hover { box-shadow: 0 4px 14px rgba(31,157,85,.4); }
+
+/* sala operativa: riepilogo turni del mese e divisione personale esterno */
+#lenzuolo-so td.turni-mese { background: var(--grigio); font-weight: 700; }
+#lenzuolo-so tr.so-separatore td { border-top: 3px solid #8fa1ad; }

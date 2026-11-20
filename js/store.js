@@ -27,6 +27,7 @@ function load() {
       migrAutista();
       state.__appVersion = APP_VERSION;
       if (!state.settings) { state.settings = { anno: ANNO_DEFAULT }; }
+      state.soRinforzi = state.soRinforzi || [];
       save();
     } else {
       state = seedInit();
@@ -55,7 +56,29 @@ function seedInit() {
   const s = JSON.parse(JSON.stringify(SEED));
   s.exceptions = s.exceptions || [];
   s.settings = s.settings || { anno: ANNO_DEFAULT };
+  s.soRinforzi = s.soRinforzi || [];
   return s;
+}
+
+// personale di rinforzo esterno: esiste SOLO nella pagina Sala Operativa
+export function addSoRinforzo(dati) {
+  if (!state.soRinforzi) state.soRinforzi = [];
+  const p = {
+    id: "soext-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7),
+    cognome: dati.cognome, nome: dati.nome, grado: dati.grado || "",
+    esterno: true,
+  };
+  state.soRinforzi.push(p);
+  save();
+  return p;
+}
+
+export function deleteSoRinforzo(id) {
+  state.soRinforzi = (state.soRinforzi || []).filter(x => x.id !== id);
+  for (const anno of Object.keys(state.causali || {})) {
+    if (state.causali[anno]) state.causali[anno] = state.causali[anno].filter(x => x.p !== id);
+  }
+  save();
 }
 
 export function save() {
