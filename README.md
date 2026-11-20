@@ -47,7 +47,8 @@ Anno di partenza: **2027**.
   - Tutto l'anno in orizzontale, con scorrimento; i 12 mesi in fila.
   - Le celle RP (riposo) sono calcolate automaticamente dal salto turno.
   - Clicca una cella per assegnare una causale: L (licenza), Mis (missione),
-    M (malattia), SO (sala operativa), R (rinforzo).
+    M (malattia), R (rinforzo). La causale SO (sala operativa) si assegna
+    dalla pagina Sala Operativa.
   - La colonna RP di ogni mese permette un cambio di salto turno
     **valido solo per quel mese** (eccezione, non tocca l'archivio).
   - I nomi restano fissi mentre si scorre verso destra (colonne fisse);
@@ -59,7 +60,7 @@ Anno di partenza: **2027**.
     causale parte dal primo turno utile.
   - Totali a destra per persona: L, **L estive** (licenze dei mesi di
     giugno, luglio, agosto e settembre; colonna gialla, diventa rossa se
-    una persona supera le 8 licenze estive), SO e R.
+    una persona supera le 8 licenze estive) e R.
   - Righe di conteggio in basso per ogni turno: PERSONALE IN TURNO
     (celle vuote + SO + R, riposi e assenze esclusi), PERSONALE MESTRE
     (come sopra ma senza i rinforzi R), **ASSENZE TOTALI (RP + L)**

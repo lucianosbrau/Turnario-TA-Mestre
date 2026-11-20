@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.14.2. Ultima versione pubblicata: **0.14.2**.
+Data di riferimento: fine v0.15.0. Ultima versione pubblicata: **0.15.0**.
 
 **Sala Operativa (v0.14.0)**: pulsante verde in coda alla barra della home,
 routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
@@ -22,6 +22,15 @@ distruttivo "Elimina personale" per la rimozione con spunte (cancella anche le l
 causali); divisione piu' spessa (classe so-separatore) sopra il primo esterno se
 sopra c'e' personale Mestre. Inserimento/cancellazione del personale da home si
 riflette qui solo se la persona ha la spunta SO115.
+**v0.15.0**: il foglio Presenze non offre piu' la causale SO (ne' dal menu
+cella ne' dalla causale su periodo) e la colonna SO del riepilogo a destra
+e' rimossa (restano L, L estive, R); la riga di conteggio in basso
+"SO115 presenti" resta con il suo alert (<5). La Sala Operativa mostra ora
+per gli operatori SO115 anche gli RP dell'anagrafica (calendario compilato
+automaticamente, oltre alle causali). Il form dei rinforzi esterni chiede
+solo cognome, nome e RP (niente grado): la riga del nuovo esterno viene
+popolata automaticamente con i suoi riposi RP per tutto l'anno.
+
 
 ## 1. Contesto e obiettivo
 
@@ -230,3 +239,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.14.0 | pulsante verde Sala Operativa: pagina dedicata con lenzuolo limitato al personale SO115 (struttura iniziale; riepiloghi da definire) |
 | v0.14.1 | sala operativa: solo causale SO, riepiloghi Turni mensili e totale SO, personale di rinforzo esterno confinato, separatore grafico |
 | v0.14.2 | Turni mensili = SO assegnati anche per il personale Mestre; pulsante dedicato 'Elimina personale' per gli esterni (persistono tra gli anni) |
+| v0.15.0 | Presenze senza causale SO e senza colonna SO; SO115 in basso con alert resta; Sala Operativa con RP anagrafica + esterni con solo RP |
