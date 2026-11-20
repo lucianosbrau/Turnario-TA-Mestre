@@ -11,12 +11,16 @@ Anno di partenza: **2027**.
   - Anno di riferimento: resta memorizzato tra una sessione e l'altra.
   - Elenco del personale con grado, RP (salto turno), specializzazioni e
     periodo di validità (dal / al). Chi esce dal turno resta in archivio.
+  - Nella scheda persona i campi obbligatori sono solo cognome e nome;
+    tutto il resto (grado, RP, autista, specializzazioni, date) e'
+    facoltativo.
   - Tra le specializzazioni di ogni persona c'e' anche **Autista** con menu
     a tendina: 1°, 2°, 3° o 4° (i vecchi dati salvati "1".."4" vengono
     convertiti automaticamente).
   - Pulsanti: Presenze, Inserisci personale, Cancella personale, Cambio RP
-    (definitivo, con decorrenza e storico), Ordina personale (l'ordine per
-    grado e' comunque automatico a ogni inserimento), Esporta backup.
+    (definitivo, con decorrenza e storico), Esporta backup.
+  - L'ordine del personale e' automatico (grado e capo turno) in tutta
+    l'app, incluso il lenzuolo: nessun pulsante di ordinamento.
 - **Grafica**: font Titillium Web (open source, SIL OFL — è il carattere
   tipografico istituzionale usato dal sito dei Vigili del Fuoco), self-hosted
   in `fonts/` per funzionare offline; colonne del lenzuolo colorate per

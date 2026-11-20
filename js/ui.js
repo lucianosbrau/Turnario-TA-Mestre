@@ -37,10 +37,6 @@ export function init() {
     } catch (e) { alert(e.message); }
   };
   $("#btn-cambio-rp").onclick = apriCambioRp;
-  $("#btn-ordina").onclick = () => {
-    renderHome();
-    alert("Personale ordinato per grado (CSE → CR → CRE → CS → VC → VE → VF, capo turno per primo).\nL'ordine viene applicato in automatico anche dopo ogni nuovo inserimento.");
-  };
   sync.onStatus(mostraStatoSync);
   aggiornaPannelloSync();
   $("#chiudi-modale").addEventListener("click", chiudiModale);
@@ -225,9 +221,12 @@ function apriPersona(id) {
   $("#fp-annulla").onclick = chiudiModale;
   $("#fp-salva").onclick = () => {
     const f = $("#form-persona");
+    const cognome = f.querySelector('[name="cognome"]').value.trim();
+    const nome = f.querySelector('[name="nome"]').value.trim();
+    if (!cognome || !nome) { alert("Cognome e nome sono obbligatori."); return; }
     const dati = {
-      cognome: f.querySelector('[name="cognome"]').value.trim(),
-      nome: f.querySelector('[name="nome"]').value.trim(),
+      cognome,
+      nome,
       grado: f.querySelector('[name="grado"]').value,
       rp: f.querySelector('[name="rp"]').value,
       capoTurno: f.querySelector('[name="capoTurno"]').value,
