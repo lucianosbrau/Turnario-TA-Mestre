@@ -44,6 +44,44 @@ Anno di partenza: **2027**.
   salto A3 (verificata contro il file Excel). Qualsiasi anno, passato o
   futuro, si calcola da qui.
 
+## Sincronizzazione tra dispositivi (Supabase)
+
+La compilazione si ritrova uguale su PC e telefono senza nessun file da
+gestire: l'archivio viene salvato online in automatico a ogni modifica e
+scaricato all'apertura. Se la rete manca, l'app funziona lo stesso e si
+risincronizza appena torna.
+
+### Attivazione (una volta sola, chi gestisce il progetto)
+1. Nel pannello del proprio account Supabase, in **SQL Editor**, eseguire:
+
+```sql
+create table if not exists turnario_archivio (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  stato jsonb not null,
+  aggiornato_al timestamptz not null default now()
+);
+alter table turnario_archivio enable row level security;
+create policy "solo proprietario legge" on turnario_archivio
+  for select using (auth.uid() = user_id);
+create policy "solo proprietario inserisce" on turnario_archivio
+  for insert with check (auth.uid() = user_id);
+create policy "solo proprietario aggiorna" on turnario_archivio
+  for update using (auth.uid() = user_id);
+```
+
+2. In **Authentication → Users → Add user**: creare l'account del turno
+   (email + password a scelta) e confermarlo (auto-confirm).
+3. In **Settings → API**: copiare *Project URL* e *anon public key* dentro
+   `SUPABASE_URL` e `SUPABASE_ANON_KEY` in `js/config.js` e pubblicare.
+
+Dopo la pubblicazione, su ogni dispositivo: pagina principale →
+**"Attiva la sincronizzazione"** → email e password del turno, una volta
+sola. Lo stato della sincronizzazione e' sempre visibile in alto.
+
+Chiave di volta: se due dispositivi compilano **contemporaneamente**, vince
+l'ultima modifica; l'app conserva comunque uno snapshot prima di applicare
+l'archivio dal cloud.
+
 ## Aggiornamenti e dati: come non perdere la compilazione
 
 I dati compilati (causali, personale, RP) **vivono nel browser**, separati dal
