@@ -1,6 +1,6 @@
 // Configurazione dell'applicazione.
 // Le due costanti qui sotto vanno aggiornate insieme a ogni modifica importante.
-export const APP_VERSION = "0.5.0";
+export const APP_VERSION = "0.5.1";
 
 // Anno di default al primo avvio ( cambiabile in alta pagina e memorizzato ).
 export const ANNO_DEFAULT = 2027;
@@ -49,8 +49,8 @@ export const SPEC_FIELDS = ["AS","AG","SO115","PN","NBCR","SFA","SA","USAR","TAS
 // segreti. I dati restano protetti dalle regole di accesso (solo l'account
 // del turno puo' leggere/scrivere la propria riga).
 // Lasciarli vuoti = app solo locale, come prima.
-export const SUPABASE_URL = "";
-export const SUPABASE_ANON_KEY = "";
+export const SUPABASE_URL = "https://ixtvscgayclccwhfwqyw.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dHZzY2dheWNsY2N3aGZ3cXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxODIyNDksImV4cCI6MjExMDc1ODI0OX0.1klLwc57ZwtKtRpJtfPF9ALcaQyzi1SHVNp_jU3NHaY";
 
 export const MESI = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno",
                      "Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
