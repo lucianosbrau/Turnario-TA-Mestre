@@ -2,6 +2,7 @@
 import { APP_VERSION, CAUSALI, SLOT, SLOT_COLOR, GRADI, GRADO_ORDER, AUTISTA, SPEC_FIELDS, MESI } from "./config.js";
 import * as store from "./store.js";
 import * as sync from "./sync.js";
+import * as lock from "./lock.js";
 import { turniAnno, attivoIn, rpEffettivo, valoreCella, presente, effettiviTurno, isoToIt, todayIso, cellKey } from "./engine.js";
 
 const $ = (sel) => document.querySelector(sel);
@@ -19,6 +20,16 @@ export function init() {
   $("#btn-export").addEventListener("click", esporta);
   $("#btn-import").addEventListener("click", () => $("#file-import").click());
   $("#file-import").addEventListener("change", importa);
+  $("#btn-cambia-pass").onclick = async () => {
+    const vecchia = prompt("Password attuale:");
+    if (vecchia === null) return;
+    const nuova = prompt("Nuova password (minimo 4 caratteri):");
+    if (nuova === null) return;
+    try {
+      await lock.cambiaPassword(vecchia, nuova);
+      alert("Password aggiornata.");
+    } catch (e) { alert(e.message); }
+  };
   $("#btn-snapshot").addEventListener("click", () => {
     if (confirm("Ripristinare l'ultima copia di sicurezza? Le modifiche fatte dopo quella copia andranno perse.")) {
       if (store.ripristinaSnapshot()) { alert("Copia di sicurezza ripristinata."); render(); }
@@ -106,8 +117,10 @@ function aggiornaPannelloSync() {
 
 function mostraPagina() {
   const presenze = location.hash === "#presenze";
-  $("#pagina-home").style.display = presenze ? "none" : "";
-  $("#pagina-presenze").style.display = presenze ? "" : "none";
+  // gestisce l'attributo hidden (non solo lo stile), altrimenti il browser
+  // continua a non mostrare la sezione
+  $("#pagina-home").toggleAttribute("hidden", presenze);
+  $("#pagina-presenze").toggleAttribute("hidden", !presenze);
   if (presenze) renderPresenze(); else renderHome();
 }
 

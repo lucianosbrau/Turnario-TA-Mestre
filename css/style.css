@@ -215,3 +215,23 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 .form-sync { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-top: 8px; }
 .form-sync label { display: grid; gap: 4px; font-size: .78rem; font-weight: 700; color: var(--scuro); }
 .form-sync input { padding: 7px 10px; border: 1px solid var(--bordo); border-radius: 8px; font-family: inherit; }
+
+
+/* ---------- schermata di blocco ---------- */
+#blocco {
+  position: fixed; inset: 0; z-index: 200; display: none;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #263238 0%, var(--scuro) 60%, #4a5b66 100%);
+}
+.blocco-box {
+  background: var(--carta); border-radius: 18px; padding: 30px 34px; width: min(92vw, 420px);
+  text-align: center; box-shadow: 0 24px 70px rgba(0,0,0,.4);
+}
+.blocco-box h1 { margin: 0 0 10px; font-size: 1.25rem; color: var(--scuro); }
+.form-blocco { display: grid; gap: 10px; margin-top: 14px; }
+.form-blocco input {
+  padding: 11px 14px; border: 1px solid var(--bordo); border-radius: 10px;
+  font-size: 1rem; font-family: inherit; text-align: center;
+}
+.form-blocco input:focus { outline: 2px solid var(--accento); outline-offset: 1px; }
+.form-blocco button { border: none; background: linear-gradient(135deg, var(--accento), #ff7a50); color: #fff; font-weight: 700; padding: 11px; border-radius: 10px; }

@@ -1,7 +1,7 @@
 {
-  "name": "Turnario Turno A — Portogruaro",
+  "name": "Turnario TA — Centrale Mestre",
   "short_name": "Turnario TA",
-  "description": "Gestione presenze e turni del Turno A di Portogruaro",
+  "description": "Gestione presenze e turni del Turno TA della Centrale di Mestre",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
