@@ -117,7 +117,7 @@ td.aut { text-align: center; }
 
 /* la pagina Presenze sfrutta tutta la larghezza del monitor (anche curvi/ultra-wide);
    la pagina Personale resta centrata per leggibilita' */
-#pagina-presenze { max-width: none; padding: 14px 20px 32px; }
+#pagina-presenze, #pagina-so { max-width: none; padding: 14px 20px 32px; }
 .lenzuolo-wrap { overflow: auto; max-height: calc(100vh - 150px); border-radius: 14px; background: #fff; box-shadow: 0 1px 8px rgba(36,49,58,.08); border: 1px solid var(--bordo); }
 #lenzuolo, #lenzuolo-so th, #lenzuolo, #lenzuolo-so td { border: 1px solid #e3e8ec; padding: 3px 5px; text-align: center; white-space: nowrap; font-size: .76rem; }
 #lenzuolo, #lenzuolo-so thead th { position: sticky; font-weight: 600; background: #f6f8fa; z-index: 2; }
