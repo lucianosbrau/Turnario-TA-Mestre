@@ -1,6 +1,6 @@
 // Configurazione dell'applicazione.
 // Le due costanti qui sotto vanno aggiornate insieme a ogni modifica importante.
-export const APP_VERSION = "0.3.1";
+export const APP_VERSION = "0.4.0";
 
 // Anno di default al primo avvio ( cambiabile in alta pagina e memorizzato ).
 export const ANNO_DEFAULT = 2027;
@@ -43,6 +43,14 @@ export const GRADI = ["VF","VE","VC","CS","CSE","CR","CRE"];
 export const GRADO_ORDER = ["CSE","CR","CRE","CS","VC","VE","VF"];
 export const AUTISTA = ["1","2","3","4"];
 export const SPEC_FIELDS = ["AS","AG","SO115","PN","NBCR","SFA","SA","USAR","TAS1","TAS2","SAF"];
+
+// Sincronizzazione online (Supabase). Questi due valori sono pubblici per
+// progetto (si trovano in Impostazioni > API del pannello Supabase): non sono
+// segreti. I dati restano protetti dalle regole di accesso (solo l'account
+// del turno puo' leggere/scrivere la propria riga).
+// Lasciarli vuoti = app solo locale, come prima.
+export const SUPABASE_URL = "";
+export const SUPABASE_ANON_KEY = "";
 
 export const MESI = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno",
                      "Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];

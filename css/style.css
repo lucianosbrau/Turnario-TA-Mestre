@@ -197,3 +197,21 @@ table.mini button { padding: 4px 10px; font-size: .78rem; }
 
 /* seconda riga di conteggio (senza rinforzi) */
 #lenzuolo tr.effettivi.mstre td { background: #dff0e9; color: #0b4f3f; }
+
+/* ---------- sincronizzazione ---------- */
+.stato-sync {
+  font-size: .76rem; font-weight: 600; padding: 3px 12px; border-radius: 999px;
+  background: rgba(255,255,255,.16); color: #fff; min-width: 0;
+}
+.stato-sync.ok { background: #2e9e6b; }
+.stato-sync.pend { background: #d69e00; }
+.stato-sync.ko { background: #b3261e; }
+.card-sync {
+  background: #fff; border: 1px solid var(--bordo); border-radius: 14px;
+  padding: 14px 16px; margin: 10px 0; box-shadow: 0 1px 6px rgba(36,49,58,.06);
+  font-size: .84rem;
+}
+.card-sync code { background: #eef2f6; padding: 1px 6px; border-radius: 6px; }
+.form-sync { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-top: 8px; }
+.form-sync label { display: grid; gap: 4px; font-size: .78rem; font-weight: 700; color: var(--scuro); }
+.form-sync input { padding: 7px 10px; border: 1px solid var(--bordo); border-radius: 8px; font-family: inherit; }

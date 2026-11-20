@@ -21,6 +21,7 @@
     </h1>
     <div class="info-versione">
       <span id="versione" class="badge"></span>
+      <span id="badge-sync" class="stato-sync" title="Stato della sincronizzazione">…</span>
       <label>Anno di riferimento
         <input type="number" id="anno" min="2020" max="2100" step="1">
       </label>
@@ -37,6 +38,8 @@
     <button id="btn-reset" class="distruttivo">Ripristina dati iniziali</button>
   </p>
   <p id="situazione" class="situazione"></p>
+
+  <div id="pannello-sync" class="card-sync"></div>
 
   <h2>Personale</h2>
   <p class="aiuto">La colonna RP mostra il salto turno attuale di oggi. Quello tra parentesi è l'RP base.

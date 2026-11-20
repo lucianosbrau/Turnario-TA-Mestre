@@ -1,6 +1,7 @@
 // Interfaccia utente: pagina principale (Personale) e pagina Presenze (lenzuolo).
 import { APP_VERSION, CAUSALI, SLOT, SLOT_COLOR, GRADI, GRADO_ORDER, AUTISTA, SPEC_FIELDS, MESI } from "./config.js";
 import * as store from "./store.js";
+import * as sync from "./sync.js";
 import { turniAnno, attivoIn, rpEffettivo, valoreCella, presente, effettiviTurno, isoToIt, todayIso, cellKey } from "./engine.js";
 
 const $ = (sel) => document.querySelector(sel);
@@ -30,8 +31,77 @@ export function init() {
       render();
     }
   });
+  sync.onStatus(mostraStatoSync);
+  aggiornaPannelloSync();
   window.addEventListener("hashchange", mostraPagina);
   mostraPagina();
+  sync.avvio(
+    (stato) => { try { store.applicaStatoCloud(stato); render(); } catch (e) { alert("Archivio cloud non valido: uso quello locale."); } },
+    () => JSON.parse(localStorage.getItem("turnario-ta-v1") || "null")
+  );
+}
+
+function mostraStatoSync(stato, dettaglio) {
+  const el = $("#badge-sync");
+  if (!el) return;
+  const ora = new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  const map = {
+    "spenta": ["Sync non configurata", ""],
+    "senza-credenziali": ["Account del turno non inserito", ""],
+    "erroe": ["Errore di sincronizzazione", ""],
+    "errore": ["Errore di sincronizzazione", ""],
+    "in-attesa": ["Modifiche da salvare online…", ""],
+    "sincronizzato": ["Sincronizzato ✓", ""],
+  };
+  const [testo, cls] = map[stato] || [stato, ""];
+  el.textContent = testo;
+  el.className = "stato-sync " + (stato === "sincronizzato" ? "ok" : stato === "in-attesa" ? "pend" : "ko");
+  el.title = dettaglio ? dettaglio + " (" + ora + ")" : ora;
+}
+
+function aggiornaPannelloSync() {
+  const box = $("#pannello-sync");
+  if (!box) return;
+  if (!sync.attivo()) {
+    box.innerHTML = `<p class="aiuto">Sincronizzazione multi-dispositivo non ancora configurata nel progetto
+      (valori <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> in <code>js/config.js</code>).
+      Fino ad allora l'app funziona solo in locale, con backup tramite Esporta/Importa.</p>`;
+    return;
+  }
+  if (sync.credenzialiSalvate()) {
+    box.innerHTML = `<p class="aiuto">Sincronizzazione attiva: ogni modifica viene salvata online in automatico
+      e ritrovata da qualunque dispositivo con le credenziali del turno.
+      <button id="sync-disconnetti" class="distruttivo">Disconnetti questo dispositivo</button></p>`;
+    $("#sync-disconnetti").onclick = () => {
+      sync.disconnetti();
+      aggiornaPannelloSync();
+      mostraStatoSync("spenta");
+    };
+  } else {
+    box.innerHTML = `
+      <p class="aiuto">Attiva la sincronizzazione su questo dispositivo con l'account del turno
+        (email e password scelti quando e' stato creato). Si inserisce una volta sola.</p>
+      <div class="form-sync">
+        <label>Email <input type="email" id="sync-email" placeholder="turnario@..."></label>
+        <label>Password <input type="password" id="sync-pass"></label>
+        <button id="sync-attiva">Attiva la sincronizzazione</button>
+      </div>`;
+    $("#sync-attiva").onclick = async () => {
+      const email = $("#sync-email").value.trim();
+      const password = $("#sync-pass").value;
+      if (!email || !password) { alert("Inserisci email e password."); return; }
+      sync.impostaCredenziali(email, password);
+      const ok = await sync.login();
+      if (ok) {
+        await sync.avvio(
+          (stato) => { try { store.applicaStatoCloud(stato); render(); } catch (e) { alert("Archivio cloud non valido: uso quello locale."); } },
+          () => JSON.parse(localStorage.getItem("turnario-ta-v1") || "null")
+        );
+        aggiornaPannelloSync();
+        renderHome();
+      } else alert("Accesso non riuscito: controlla email e password (l'account deve essere confermato su Supabase).");
+    };
+  }
 }
 
 function mostraPagina() {

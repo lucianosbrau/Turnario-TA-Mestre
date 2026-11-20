@@ -1,6 +1,7 @@
 // Archivio dati: tutto in locale (localStorage del browser) + backup export/import.
 import { SEED } from "./seed-data.js";
 import { ANNO_DEFAULT, APP_VERSION } from "./config.js";
+import * as sync from "./sync.js";
 
 const KEY = "turnario-ta-v1";
 
@@ -46,7 +47,25 @@ function seedInit() {
 }
 
 export function save() {
+  state.__aggiornatoAl = new Date().toISOString();
   localStorage.setItem(KEY, JSON.stringify(state));
+  sync.programmaPush(saveLocal, () => JSON.parse(localStorage.getItem(KEY)));
+}
+
+// salvataggio senza far ripartire la sincronizzazione (per applicare lo stato dal cloud)
+export function saveLocal() {
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+// applica lo stato arrivato dal cloud (gia' validato come oggetto JSON)
+export function applicaStatoCloud(stato) {
+  if (!stato || !Array.isArray(stato.personale)) throw new Error("Archivio cloud non valido");
+  const raw = localStorage.getItem(KEY);
+  if (raw) localStorage.setItem(KEY + "-snapshot", raw);   // al sicuro prima di toccare
+  state = stato;
+  if (!state.settings) state.settings = { anno: ANNO_DEFAULT };
+  state.__appVersion = APP_VERSION;
+  saveLocal();
 }
 
 // icrea nuovo id per una persona
