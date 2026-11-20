@@ -5,14 +5,21 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.14.0. Ultima versione pubblicata: **0.14.0**.
+Data di riferimento: fine v0.14.1. Ultima versione pubblicata: **0.14.1**.
 
 **Sala Operativa (v0.14.0)**: pulsante verde in coda alla barra della home,
 routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
 identico al lenzuolo (mesi, date, D/N, slot, colonna RP del mese, celle
 causali cliccabili) ma righe limitate a chi ha la spunta SO115 in anagrafica;
-toggle "solo attivi" locale (#so-solo-attivi). RIEPILOGHI ANCORA DA
-DEFINIRE con l'utente.
+toggle "solo attivi" locale (#so-solo-attivi). 
+**Regole v0.14.1**: causale ammessa SOLO "SO"; riepilogo "Turni" alla fine di ogni mese
+(personale Mestre = turni in cui e' presente; esterni = turni SO assegnati); unico
+totale a destra = SO annuo; NESSUN alert/banner. Pulsante verde "Aggiungi personale
+di rinforzo": archivio separato `state.soRinforzi` (id "soext-..."): gli esterni
+vivono SOLO in questa pagina (mai in lenzuolo/conteggi/home), si cancellano dal
+loro modale con tutte le causali; divisione piu' spessa (classe so-separatore)
+sopra il primo esterno se sopra c'e' personale Mestre. Inserimento/cancellazione
+del personale da home si riflette qui solo se la persona ha la spunta SO115.
 
 ## 1. Contesto e obiettivo
 
@@ -219,3 +226,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.13.0 | causale su periodo: calendario + turni in un'unica scheda (no prompt) |
 | v0.13.1 | riga ASSENZE TOTALI (RP+L) gialla con alert 27%, licenze senza alert; bordi riepilogo più marcati; intestazione calendario bloccata allo scroll verticale |
 | v0.14.0 | pulsante verde Sala Operativa: pagina dedicata con lenzuolo limitato al personale SO115 (struttura iniziale; riepiloghi da definire) |
+| v0.14.1 | sala operativa: solo causale SO, riepiloghi Turni mensili e totale SO, personale di rinforzo esterno confinato, separatore grafico |
