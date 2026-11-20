@@ -21,6 +21,8 @@ export function init() {
     render();
   });
   $("#btn-presenze").addEventListener("click", () => { location.hash = "#presenze"; });
+  $("#btn-so").addEventListener("click", () => { location.hash = "#so"; });
+  $("#btn-so-home").addEventListener("click", () => { location.hash = ""; mostraPagina(); });
   $("#btn-home").addEventListener("click", () => { location.hash = "#"; });
   $("#btn-export").addEventListener("click", esporta);
   $("#btn-cancella-persona").onclick = apriCancellaPersona;
@@ -128,16 +130,20 @@ function aggiornaPannelloSync() {
 }
 
 function mostraPagina() {
-  const presenze = location.hash === "#presenze";
+  const pagina = location.hash;
   // gestisce l'attributo hidden (non solo lo stile), altrimenti il browser
   // continua a non mostrare la sezione
-  $("#pagina-home").toggleAttribute("hidden", presenze);
-  $("#pagina-presenze").toggleAttribute("hidden", !presenze);
-  if (presenze) renderPresenze(); else renderHome();
+  $("#pagina-home").toggleAttribute("hidden", pagina !== "");
+  $("#pagina-presenze").toggleAttribute("hidden", pagina !== "#presenze");
+  $("#pagina-so").toggleAttribute("hidden", pagina !== "#so");
+  if (pagina === "#presenze") renderPresenze();
+  else if (pagina === "#so") renderSo();
+  else renderHome();
 }
 
 function render() {
   if (location.hash === "#presenze") renderPresenze();
+  else if (location.hash === "#so") renderSo();
   else renderHome();
 }
 
@@ -170,6 +176,62 @@ function renderHome() {
   tb.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => apriPersona(b.dataset.edit)));
   tb.querySelectorAll("[data-stor]").forEach(b => b.addEventListener("click", () => apriStorico(b.dataset.stor)));
   $("#btn-nuova-persona").onclick = () => apriPersona(null);
+}
+
+/* ---------------- SALA OPERATIVA: lenzuolo solo SO115 ---------------- */
+
+function renderSo() {
+  const s = store.getState();
+  const a = anno();
+  const turni = turniAnno(a);
+  const cmap = store.mappaCausali(a);
+  $("#so-anno").textContent = a;
+
+  const inizioAnno = `${a}-01-01`, fineAnno = `${a}-12-31`;
+  const sky = s.personale.filter(p => p.spec?.SO115 === "Si" && (!p.dal || p.dal <= fineAnno) && (!p.al || p.al >= inizioAnno));
+  let persone = ordinaPersone(sky);
+  if ($("#so-solo-attivi")?.checked === true) persone = persone.filter(p => attivoIn(p, todayIso()));
+
+  const mesi = [];
+  for (const t of turni) {
+    let g = mesi.find(m => m.mese === t.month);
+    if (!g) { g = { mese: t.month, turni: [] }; mesi.push(g); }
+    g.turni.push(t);
+  }
+
+  const tb = $("#lenzuolo-so");
+  let html = "<thead>";
+  html += `<tr><th class="stick1" rowspan="4">Persona</th><th class="stick2" rowspan="4">Grado</th><th class="stick3" rowspan="4">Aut</th>`;
+  for (const g of mesi) html += `<th class="mese" colspan="${g.turni.length + 1}" data-mese="${g.mese}">${MESI[Number(g.mese.slice(5)) - 1].toUpperCase()}</th>`;
+  html += `</tr>`;
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm">RP</th>` + g.turni.map(t => `<th class="hcell">${Number(t.date.slice(8))}</th>`).join("")).join("") + "</tr>";
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell fase" style="background:${SLOT_COLOR[t.slot]}">${t.phase}</th>`).join("")).join("") + "</tr>";
+  html += "<tr>" + mesi.map(g => `<th class="hcell rpm"></th>` + g.turni.map(t => `<th class="hcell slot" style="background:${SLOT_COLOR[t.slot]}">${t.slot}</th>`).join("")).join("") + "</tr>";
+  html += "</thead><tbody>";
+  for (const p of persone) {
+    html += `<tr class="${attivoIn(p, todayIso()) ? "" : "gray"}">`;
+    html += `<td class="stick1 nome">${p.cognome} ${p.nome}</td>`;
+    html += `<td class="stick2">${p.grado || ""}</td>`;
+    html += `<td class="stick3">${p.autista || ""}</td>`;
+    for (const g of mesi) {
+      const rpMese = rpEffettivo(s, p.id, g.mese + "-01");
+      html += `<td class="rpmese">${rpMese}</td>`;
+      for (const t of g.turni) {
+        const v = valoreCella(s, p, t, cmap);
+        html += `<td class="cella v-${v} col${t.slot} ${attivoIn(p, t.date) ? "" : "gray"}" data-cella="${p.id}|${t.date}" title="${t.date} ${t.phase} ${t.slot}">${v === "RP" ? "RP" : v}</td>`;
+      }
+    }
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  tb.innerHTML = html;
+  tb.querySelectorAll("[data-cella]").forEach(td => td.addEventListener("click", () => {
+    const [pid, date] = td.dataset.cella.split("|");
+    menuCausale(td, pid, date);
+  }));
+  tb.querySelectorAll("th[data-mese]").forEach(th => th.addEventListener("click", () => {
+    th.scrollIntoView({ behavior: "smooth", inline: "start", block: "start" });
+  }));
 }
 
 function ordinaPersone(arr) {
@@ -754,6 +816,9 @@ export function bindPresenze() {
     if (e.target.id === "solo-attivi-home") {
       soloAttiviHome = e.target.checked;
       renderHome();
+    }
+    if (e.target.id === "so-solo-attivi") {
+      renderSo();
     }
   });
 }

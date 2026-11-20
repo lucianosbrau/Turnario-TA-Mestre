@@ -37,6 +37,7 @@
     <button id="btn-import">Importa backup</button>
     <input type="file" id="file-import" accept="application/json,.json" hidden>
     <button id="btn-cambia-pass">Cambia password di accesso</button>
+    <button id="btn-so" class="verde">Sala Operativa</button>
   </p>
 
   <div id="pannello-sync" class="card-sync"></div>
@@ -52,6 +53,27 @@
       </thead>
       <tbody></tbody>
     </table>
+  </div>
+</section>
+
+<!-- ============ PAGINA SALA OPERATIVA (solo SO115) ============ -->
+<section id="pagina-so" hidden>
+  <header class="barra-presenze">
+    <button id="btn-so-home">← Personale</button>
+    <h2>Sala Operativa <span id="so-anno"></span></h2>
+    <label class="toggle"><input type="checkbox" id="so-solo-attivi" checked> Solo personale in turno</label>
+    <div class="legenda">
+      <span class="lg c-RP"><b>RP</b> riposo</span>
+      <span class="lg c-L"><b>L</b> licenza</span>
+      <span class="lg c-Mis"><b>Mis</b> missione</span>
+      <span class="lg c-M"><b>M</b> malattia</span>
+      <span class="lg c-SO"><b>SO</b> sala op.</span>
+      <span class="lg c-R"><b>R</b> rinforzo</span>
+    </div>
+  </header>
+  <p class="aiuto">Calendario del personale con abilitazione <b>SO115</b> (spuntata in anagrafica), stesso schema del lenzuolo: clicca una cella per mettere o togliere una causale. I riepiloghi arriveranno nelle prossime versioni.</p>
+  <div class="lenzuolo-wrap">
+    <table id="lenzuolo-so"></table>
   </div>
 </section>
 
