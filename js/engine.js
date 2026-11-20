@@ -78,11 +78,19 @@ export function valoreCella(state, person, turn, causaliMap) {
   return "";
 }
 
-// e' una presenza di sede? causali SO/R contano, RP e' riposo (non conteggiato),
+// e' una presenza di turno? causali SO/R contano, RP e' riposo (non conteggiato),
 // la cella vuota e' presenza solo se non e' il giorno di RP della persona
 export function presente(state, person, turn, causaliMap) {
   const c = causaliMap[cellKey(person.id, turn.date)] || "";
   if (c === "SO" || c === "R") return true;
+  if (c !== "") return false;
+  return rpEffettivo(state, person.id, turn.date) !== turn.slot;
+}
+
+// presenza in SEDE: come sopra ma chi e' in rinforzo (R) lavora altrove
+export function presenteSede(state, person, turn, causaliMap) {
+  const c = causaliMap[cellKey(person.id, turn.date)] || "";
+  if (c === "SO") return true;
   if (c !== "") return false;
   return rpEffettivo(state, person.id, turn.date) !== turn.slot;
 }
