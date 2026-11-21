@@ -1,6 +1,9 @@
 import * as ui from "./ui.js";
 import * as lock from "./lock.js";
 import * as sync from "./sync.js";
+import { attivaErrorLog } from "./errorlog.js";
+
+attivaErrorLog();
 
 async function gestisciAccesso() {
   const box = document.getElementById("blocco");
