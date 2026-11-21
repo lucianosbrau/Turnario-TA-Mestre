@@ -311,3 +311,38 @@ button.verde:hover { box-shadow: 0 4px 14px rgba(31,157,85,.4); }
 /* Sala Operativa: spazio sotto la tabella e righe più alte del 30% */
 #lenzuolo-so { margin-bottom: 18px; }
 #lenzuolo-so th, #lenzuolo-so td { padding-top: 4px; padding-bottom: 4px; }
+
+/* Banner di sincronizzazione: il cloud e' cambiato da un altro dispositivo */
+.banner-remoto {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 92%;
+  background: #1d4e89;
+  color: #fff;
+  border: 2px solid #0d2c50;
+  border-radius: 10px;
+  padding: 10px 42px 10px 14px;
+  font-size: 14px;
+  z-index: 60;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.banner-remoto .banner-x {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.banner-remoto button.aiuto-btn {
+  margin: 0 2px;
+  padding: 1px 8px;
+  background: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

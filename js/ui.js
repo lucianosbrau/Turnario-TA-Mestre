@@ -79,6 +79,7 @@ export function init() {
     };
   }
   sync.onStatus(mostraStatoSync);
+  sync.onRemoteChange(() => { mostraBannerRemoto(); });
   aggiornaPannelloSync();
   $("#chiudi-modale").addEventListener("click", chiudiModale);
   $("#modale").addEventListener("click", (e) => {
@@ -91,6 +92,20 @@ export function init() {
     () => JSON.parse(localStorage.getItem("turnario-ta-v1") || "null"),
     () => store.isSeedFresh()
   );
+}
+
+function mostraBannerRemoto() {
+  if ($("#banner-remoto")) return;   // gia' visibile
+  const b = document.createElement("div");
+  b.id = "banner-remoto";
+  b.className = "banner-remoto";
+  b.innerHTML = `<b>Attenzione:</b> il cloud è stato aggiornato da un altro dispositivo mentre eri collegato.
+    Le sue modifiche si uniranno automaticamente al tuo prossimo salvataggio;
+    per vederle subito <button id="banner-remoto-ricarica" class="aiuto-btn">ricarica la pagina</button>.
+    <button id="banner-remoto-x" class="banner-x" title="Chiudi">✕</button>`;
+  document.body.appendChild(b);
+  $("#banner-remoto-x").onclick = () => b.remove();
+  $("#banner-remoto-ricarica").onclick = () => location.reload();
 }
 
 function mostraStatoSync(stato, dettaglio) {
