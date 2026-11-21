@@ -39,6 +39,10 @@ lancia tutte le suite e stampa PASS/FAIL per ogni controllo.
   vuoto, regressione del bug seedFresh-funzione.
 - `reg-merge-collaborativo.mjs` — lavoro simultaneo: le causali e i rinforzi
   esterni si fondono (nessuna sovrascrittura tra due dispositivi).
+- `reg-sync-live.mjs` — sincronizzazione "viva" mentre l'app e' aperta:
+  le novita' del cloud si applicano da sole (niente F5), con una finestra
+  aperta o modifiche non ancora spedita si aspetta e avvisa col banner,
+  cloud regredito viene unito e rispinto.
 
 ## Convenzioni
 

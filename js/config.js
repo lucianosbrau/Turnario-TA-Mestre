@@ -1,6 +1,6 @@
 // Configurazione dell'applicazione.
 // Le due costanti qui sotto vanno aggiornate insieme a ogni modifica importante.
-export const APP_VERSION = "1.2.1";
+export const APP_VERSION = "1.3.0";
 
 // Anno di default al primo avvio ( cambiabile in alta pagina e memorizzato ).
 export const ANNO_DEFAULT = 2027;

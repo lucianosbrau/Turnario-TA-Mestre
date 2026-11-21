@@ -21,7 +21,7 @@ for t in reg-v017 reg-seed-safe reg-push-normale reg-storico reg-cancellazione r
   echo "== $t"
   node "$REPO/test/$t.js" || FAIL=1
 done
-for t in reg-avvio-sync reg-merge-collaborativo; do
+for t in reg-avvio-sync reg-merge-collaborativo reg-sync-live; do
   echo "== $t"
   node "$REPO/test/$t.mjs" || FAIL=1
 done
