@@ -17,6 +17,7 @@ let ultimoPush = null; // iso dell'ultimo salvataggio riuscito
 let inCorsa = false;
 let statusCb = null;
 let remoteChangeCb = null;  // avviso: il cloud e' cambiato mentre l'app e' aperta
+let vistoCb = null;          // per salvare nel proprio archivio il timestamp del cloud visto
 let ultimoCloudVisto = null; // aggiornato_al del cloud come l'abbiamo visto l'ultima volta
 let applicaStatoCb = null;  // per applicare lo stato unito dopo il push
 let pollTimer = null;
@@ -25,6 +26,14 @@ export const attivo = () => !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 export function onStatus(cb) { statusCb = cb; }
 export function onRemoteChange(cb) { remoteChangeCb = cb; }
+export function onCloudVisto(cb) { vistoCb = cb; }
+
+// registra il momento del cloud che abbiamo appena visto (in sessione e nell'archivio locale)
+function visto(v) {
+  if (!v) return;
+  ultimoCloudVisto = v;
+  try { if (vistoCb) vistoCb(v); } catch {}
+}
 
 function status(s, dettaglio = "") {
   if (statusCb) statusCb(s, dettaglio);
@@ -139,7 +148,7 @@ export async function salva(statoObj) {
     if (res.ok && j === true) {
       ultimoPush = new Date().toISOString();
       const proprio = await scarica().catch(() => null);
-      if (proprio && proprio.aggiornato_al) ultimoCloudVisto = proprio.aggiornato_al;
+      if (proprio && proprio.aggiornato_al) visto(proprio.aggiornato_al);
       status("sincronizzato");
       return true;
     }
@@ -162,7 +171,7 @@ export async function salva(statoObj) {
   if (res.ok) {
     ultimoPush = new Date().toISOString();
     const proprio = await scarica().catch(() => null);
-    if (proprio && proprio.aggiornato_al) ultimoCloudVisto = proprio.aggiornato_al;
+    if (proprio && proprio.aggiornato_al) visto(proprio.aggiornato_al);
     status("sincronizzato");
     return true;
   }
@@ -188,14 +197,14 @@ export function programmaPush(runLocalmente, leggiStato) {
       try {
         const rem = await scarica();
         const tRem = (rem && rem.aggiornato_al + "" || "").slice(0, 23);
-        const tVisto = (ultimoCloudVisto + "" || "").slice(0, 23);
+        const statoLoc = leggiStato();
+        const tVisto = (statoLoc && statoLoc.__cloudVisto + "" || "").slice(0, 23);
         if (rem && rem.stato && Array.isArray(rem.stato.personale) && rem.stato.personale.length > 0
             && tVisto && tRem !== tVisto) {
-          const unito = unisciStato(leggiStato(), rem.stato);
+          const unito = unisciStato(statoLoc, rem.stato);
           await salva(unito);
           if (applicaStatoCb) { try { applicaStatoCb(unito); } catch {} }
-          status("sincronizzato", "Unite automaticamente le modifiche fatte da un altro dispositivo mentr'eri collegato.");
-          ultimoCloudVisto = rem.aggiornato_al;
+          status("sincronizzato", "Unite automaticamente le modifiche fatte da un altro dispositivo mentre eri collegato.");
           return;
         }
       } catch { /* lettura non riuscita: prosegue il push normale */ }
@@ -251,41 +260,75 @@ export async function avvio(applicaStato, statoLocale, seedVergine) {
   if (codiceLink) {
     status("in-attesa");
     const rem = await scarica();
-    if (rem && rem.aggiornato_al) ultimoCloudVisto = rem.aggiornato_al;
     // archivio locale vergine (seed non ancora modificato): se il cloud ha
     // dati veri vince SEMPRE il cloud; un seed non puo' sovrascrivere il lavoro
     if (rem && rem.stato && Array.isArray(rem.stato.personale) && rem.stato.personale.length > 0 && vergine) {
       applicaStato(rem.stato);
+      visto(rem.aggiornato_al);
       status("sincronizzato", "Archivio recuperato dal cloud.");
       return;
     }
     if (!rem || !rem.stato || !rem.stato.personale) { await salva(statoLocale()); return; }
-    const locale = statoLocale();
-    const tLocale = (locale && locale.__aggiornatoAl) || "";
-    const tRemoto = (rem.aggiornato_al + "").slice(0, 23);
-    if (!tLocale || tRemoto > tLocale.slice(0, 23)) {
-      applicaStato(rem.stato);
-      status("sincronizzato", "Archivio aggiornato dal cloud.");
-    } else status("sincronizzato");
-    return;
+    return sincronizza(rem, applicaStato, statoLocale);
   }
   if (!credenzialiSalvate()) { status("senza-credenziali"); return; }
   status("in-attesa");
   if (!session && !(await login())) return;
   const rem = await scarica();
-  if (rem && rem.aggiornato_al) ultimoCloudVisto = rem.aggiornato_al;
   if (!rem || !rem.stato || !rem.stato.personale) {
-    // nessun archivio online (o riga ancora vuota): pubble quello locale
+    // nessun archivio online (o riga ancora vuota): pubblica quello locale
     await salva(statoLocale());
     return;
   }
+  return sincronizza(rem, applicaStato, statoLocale);
+}
+
+// regole di sincronizzazione all'avvio:
+// - __cloudVisto = momento del cloud che questo dispositivo conosce
+// - __aggiornatoAl = ultime vere MODIFICHE locali
+// 1) modifiche locali non ancora spedite -> si pushano (unendosi al cloud)
+// 2) cloud piu' recente di quello che conoscevamo -> si scarica
+// 3) cloud REGREDITO (qualcuno ha pushato dati vecchi) -> si uniscono causali/rinforzi e si rispinge
+// 4) prima volta con questo schema (__cloudVisto assente) -> il cloud ha la meglio,
+//    l'archivio precedente resta nello storico delle copie di sicurezza
+async function sincronizza(rem, applicaStato, statoLocale) {
   const locale = statoLocale();
-  const tLocale = (locale && locale.__aggiornatoAl) || "";
-  const tRemoto = (rem.aggiornato_al + "").slice(0, 23);
-  if (!tLocale || tRemoto > tLocale.slice(0, 23)) {
+  const tVisto = ((locale && locale.__cloudVisto) + "" || "").slice(0, 23);
+  const tMut = ((locale && locale.__aggiornatoAl) + "" || "").slice(0, 23);
+  const tRem = (rem.aggiornato_al + "").slice(0, 23);
+  if (!tVisto) {
     applicaStato(rem.stato);
+    visto(rem.aggiornato_al);
     status("sincronizzato", "Archivio aggiornato dal cloud.");
-  } else {
-    status("sincronizzato");
+    return;
   }
+  if (tMut > tVisto) {
+    // modifiche locali non ancora spedite
+    if (tRem !== tVisto) {
+      const unito = unisciStato(statoLocale(), rem.stato);
+      await salva(unito);
+      if (applicaStatoCb) { try { applicaStatoCb(unito); } catch {} }
+      status("sincronizzato", "Spedite le modifiche fatte senza connessione, unite a quelle del cloud.");
+    } else {
+      await salva(statoLocale());
+    }
+    return;
+  }
+  if (tRem !== tVisto) {
+    if (tRem > tVisto) {
+      applicaStato(rem.stato);
+      visto(rem.aggiornato_al);
+      status("sincronizzato", "Archivio aggiornato dal cloud.");
+    } else {
+      // il cloud contiene dati PIU' VECCHI di quelli che questo dispositivo ha
+      // gia' visto (un PC con un archivio vecchio ha pushato): si fondono le
+      // causali/rinforzi del cloud e si rispinge lo stato unito
+      const unito = unisciStato(statoLocale(), rem.stato);
+      await salva(unito);
+      if (applicaStatoCb) { try { applicaStatoCb(unito); } catch {} }
+      status("sincronizzato", "Il cloud conteneva dati piu' vecchi: uniti e corretti.");
+    }
+    return;
+  }
+  status("sincronizzato");
 }
