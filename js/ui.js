@@ -41,15 +41,43 @@ export function init() {
     } catch (e) { alert(e.message); }
   };
   $("#btn-cambio-rp").onclick = apriCambioRp;
-  $("#btn-ripristina").onclick = () => {
-    if (!confirm("Ripristinare l'ultima copia di sicurezza salvata in questo browser? L'archivio attuale verra' sostituito.")) return;
-    if (store.ripristinaSnapshot()) {
-      alert("Copia di sicurezza ripristinata.");
-      render();
-    } else {
-      alert("Nessuna copia di sicurezza trovata in questo browser.");
-    }
-  };
+  $("#btn-ripristina").onclick = apriRipristina;
+  function apriRipristina() {
+    const lista = store.listaSnapshots();
+    $("#form-persona").innerHTML = `
+      <h3>Copie di sicurezza</h3>
+      <p class="aiuto">Ogni volta che l'archivio viene aggiornato o scaricato dal cloud, la copia precedente viene messa da parte qui. Scegli quella da ripristinare: l'attuale verra' sostituita.</p>
+      <div class="canc-lista">
+        ${lista.length ? lista.map((s, i) => `
+          <label class="canc-riga">
+            <input type="radio" name="snap" value="${i}" ${i === lista.length - 1 ? "checked" : ""}>
+            ${new Date(s.t).toLocaleString("it-IT")} — ${s.nPers} persone in archivio
+          </label>`).join("")
+          : `<p class="aiuto">Nessuna copia archiviata in questo browser.</p>`}
+      </div>
+      <div class="azioni-form">
+        <button id="snap-rip" class="verde">Ripristina la copia selezionata</button>
+        <button id="fp-annulla">Chiudi</button>
+      </div>`;
+    $("#modale").style.display = "flex";
+    $("#fp-annulla").onclick = chiudiModale;
+    const sel = () => {
+      const r = $("#form-persona").querySelector('input[name="snap"]:checked');
+      return r ? parseInt(r.value, 10) : -1;
+    };
+    $("#snap-rip").onclick = () => {
+      const i = sel();
+      if (i < 0) { alert("Scegli una copia dall'elenco."); return; }
+      if (!confirm("Confermi il ripristino? L'archivio attuale verra' sostituito dalla copia scelta.")) return;
+      if (store.ripristinaDaSnapshot(i)) {
+        chiudiModale();
+        alert("Copia di sicurezza ripristinata.");
+        render();
+      } else {
+        alert("Ripristino non riuscito.");
+      }
+    };
+  }
   sync.onStatus(mostraStatoSync);
   aggiornaPannelloSync();
   $("#chiudi-modale").addEventListener("click", chiudiModale);
