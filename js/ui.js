@@ -41,6 +41,15 @@ export function init() {
     } catch (e) { alert(e.message); }
   };
   $("#btn-cambio-rp").onclick = apriCambioRp;
+  $("#btn-ripristina").onclick = () => {
+    if (!confirm("Ripristinare l'ultima copia di sicurezza salvata in questo browser? L'archivio attuale verra' sostituito.")) return;
+    if (store.ripristinaSnapshot()) {
+      alert("Copia di sicurezza ripristinata.");
+      render();
+    } else {
+      alert("Nessuna copia di sicurezza trovata in questo browser.");
+    }
+  };
   sync.onStatus(mostraStatoSync);
   aggiornaPannelloSync();
   $("#chiudi-modale").addEventListener("click", chiudiModale);
