@@ -33,8 +33,10 @@ export async function verificaPassword(password) {
 
 export async function cambiaPassword(vecchia, nuova) {
   if (!(await verificaPassword(vecchia))) throw new Error("Password attuale errata");
-  localStorage.removeItem(KEY);
-  await impostaPassword(nuova);
+  if (!nuova || nuova.length < 4) throw new Error("Password troppo corta (minimo 4 caratteri)");
+  // NB: si sovrascrive solo DOPO aver validato la nuova, cosi' un rifiuto
+  // non lascia mai il dispositivo senza password
+  localStorage.setItem(KEY, await hash(nuova));
 }
 
 export function rimuoviPassword() {

@@ -56,9 +56,27 @@ await scenario('S1 vergine perde contro il cloud con lavoro (applica cloud, zero
   CLOUD_OK, { persone: [{ id: 'SEED' }] }, true, 'cloud');
 ok(!ultimaScrittura, 'S1b il seed del dispositivo vergine NON viene scritto sul cloud');
 
-// M1: prima volta col nuovo schema (__cloudVisto assente) => il cloud ha la meglio
+// M1: prima volta col nuovo schema (__cloudVisto assente), nessuna modifica locale => il cloud ha la meglio
 await scenario('M1 prima sincronizzazione col nuovo schema: il cloud viene applicato',
-  CLOUD_OK, { persone: [{ id: 'VECCHIO' }], __aggiornatoAl: '2099-01-01T00:00:00.000Z' }, false, 'cloud');
+  CLOUD_OK, { persone: [{ id: 'VECCHIO' }] }, false, 'cloud');
+
+// M1b: prima volta col nuovo schema MA con modifiche locali non ancora spedite:
+// si uniscono al cloud e si spediscono (mai perderle)
+globalThis.__applicato = null; ultimaScrittura = null; rispostaCloud = CLOUD_OK;
+const localeM1b = () => ({
+  personale: [{ id: 'MIO' }],
+  causali: { 2027: [{ p: 'MIO', d: '2027-05-09', c: 'Mis' }] },
+  __aggiornatoAl: '2027-06-01T00:00:00.000Z',
+  __cloudVisto: '',
+});
+await (async () => {
+  const res = await sync.avvio(applica, localeM1b, false);
+  ok(!!ultimaScrittura, 'M1b modifiche locali non spedita durante la migrazione: vengono spedita');
+  const caus = ultimaScrittura ? (ultimaScrittura.causali[2027] || []) : [];
+  ok(caus.some(c => c.p === 'MIO' && c.d === '2027-05-09' && c.c === 'Mis'), 'M1b-b la Mis locale arriva al cloud');
+  ok(caus.some(c => c.p === 'A' && c.d === '2027-05-05' && c.c === 'SO'), 'M1b-c la SO del cloud si unisce, non si cancella');
+  ok(!!globalThis.__applicato, 'M1b-d lo stato unito applicato anche in locale');
+})();
 
 // S2: modifiche locali non ancora spedite (tMut > tVisto), cloud immutato => push del locale, cloud NON applicato
 await scenario('S2 modifiche locali non spedite: push del locale, il cloud non si applica sopra',

@@ -39,14 +39,34 @@ lancia tutte le suite e stampa PASS/FAIL per ogni controllo.
   vuoto, regressione del bug seedFresh-funzione.
 - `reg-merge-collaborativo.mjs` — lavoro simultaneo: le causali e i rinforzi
   esterni si fondono (nessuna sovrascrittura tra due dispositivi).
+- `reg-motore.mjs` — motore dei turni: baseline convalidata sull'Excel (2026: 183
+  turni, ancora 01/09/2026 D A3), campioni fissi per data, invarianti della
+  formula delta%4, attivoIn con dal/al/eliminato.
+- `reg-unit-store.mjs` — unit test diretti di store+engine: RP base/storico/
+  eccezione, cambio RP con decorrenza, causali, export/import JSON, presente/
+  presenteSede con SO e R.
+- `reg-lock.mjs` — password del dispositivo: imposta/verifica/cambia e il caso
+  "nuova password troppo corta non cancella la vecchia".
+- `reg-statico.js` — controlli statici: coppie di selettori CSS lenzuolo/SO
+  (l'incidente v0.15), coerenza APP_VERSION/CACHE, id usati dal JS presenti
+  nell'HTML, menu causali coerenti, colore L.
+- `reg-conteggi-soglie.js` — righe di conteggio a valori attesi calcolati e
+  soglie (assenze>27% rosso, SO115<5 rosso), banner criticita' future unico
+  con data e motivo, visibile solo dopo l'inserimento di una causale.
+- `reg-disastro.mjs` — teatro del disastro: PC-A compila offline, PC-B vergine
+  apre, B salva, A rientra online: nessuna causale nè nominativo perso.
 - `reg-sync-live.mjs` — sincronizzazione "viva" mentre l'app e' aperta:
   le novita' del cloud si applicano da sole (niente F5), con una finestra
   aperta o modifiche non ancora spedita si aspetta e avvisa col banner,
   cloud regredito viene unito e rispinto.
 
+Il piano completo (inventario delle funzioni, mappa di copertura, bug storici
+trovati con questo metodo) e' in PIANO-COLLAUDI.md.
+
 ## Convenzioni
 
-- jsdom con `runScripts: 'outside-only'`, bundle valutato con `window.eval`.
+- jsdom con `runScripts: 'outside-only'`, bundle valutato con `window.eval`
+  (suite _js) oppure bundle ESM importato direttamente (suite _mjs).
 - Stub di alert/confirm/prompt/scrollIntoView; localStorage pre-popolato.
 - Sblocco password del dispositivo con `test1234`.
 - Le suite lanciano `process.exit(1)` se un controllo fallisce.
