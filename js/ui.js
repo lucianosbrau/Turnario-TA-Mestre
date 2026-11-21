@@ -118,8 +118,8 @@ function mostraStatoSync(stato, dettaglio) {
     "spenta": ["Sync non configurata", ""],
     "senza-credenziali": ["Account del turno non inserito", ""],
     "erroe": ["Errore di sincronizzazione", ""],
-    "errore": ["Errore di sincronizzazione", ""],
-    "in-attesa": ["Modifiche da salvare online…", ""],
+    "errore": ["\u26a0 Non spedito online: riprovera\u2019 presto", ""],
+    "in-attesa": ["Modifiche da spedire online…", ""],
     "sincronizzato": ["Sincronizzato ✓ " + ora, ""],
   };
   const [testo, cls] = map[stato] || [stato, ""];

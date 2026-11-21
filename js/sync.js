@@ -193,7 +193,7 @@ export function programmaPush(runLocalmente, leggiStato) {
     try {
       if (!codiceLink && !session) {
         const ok = await login();
-        if (!ok) { inCorsa = false; return; }
+        if (!ok) { inCorsa = false; timer = null; return; }
       }
       // se il cloud e' cambiato mentre lavoravamo (altro dispositivo):
       // uniamo le modifiche invece di sovrascriverle
@@ -212,7 +212,7 @@ export function programmaPush(runLocalmente, leggiStato) {
         }
       } catch { /* lettura non riuscita: prosegue il push normale */ }
       await salva(leggiStato());
-    } finally { inCorsa = false; }
+    } finally { inCorsa = false; timer = null; }   // timer azzerato: il polling live puo' continuare
   }, 2500);
 }
 
@@ -262,10 +262,15 @@ async function controlloLive() {
     if (tRem === tVisto) return;                 // nessuna novita'
     if (!tVisto) { visto(rem.aggiornato_al); return; }  // avvio non ancora completato
     const occupato = busyCb ? busyCb() : false;
-    if (tMut > tVisto || occupato) {
-      // modifiche locali non ancora spedite o finestra aperta: non si tocca
-      // l'archivio adesso (il push le unira'; con la finestra chiusa il prossimo
-      // giro le applichera'). Avviso l'utente.
+    if (tMut > tVisto) {
+      // modifiche locali non ancora arrivate sul cloud (invio fallito o
+      // avvenuto offline): appena possibile si rispediscono, unendosi a
+      // eventuali novita' del cloud. Con la finestra aperta si aspetta.
+      if (!occupato) { programmaPush(null, () => statoLocaleCb()); return; }
+      if (remoteChangeCb) remoteChangeCb();
+      return;
+    }
+    if (occupato) {
       if (remoteChangeCb) remoteChangeCb();
       return;
     }
