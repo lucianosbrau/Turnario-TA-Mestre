@@ -35,11 +35,14 @@ function load() {
       state.__appVersion = APP_VERSION;
       if (!state.settings) { state.settings = { anno: ANNO_DEFAULT }; }
       state.soRinforzi = state.soRinforzi || [];
-      save();
+      // NON si usa save(): l'apertura dell'app non e' una modifica. Salvare qui
+      // ricomponeva l'archivio locale con la data di "adesso" e lo SPEDIVA al
+      // cloud: un PC con dati vecchi sovrascriveva il lavoro al solo aprirsi.
+      saveLocal();
     } else {
       state = seedInit(); seedFresh = true; migrAutista();
       state.__appVersion = APP_VERSION;
-      save();
+      saveLocal();
     }
   } catch {
     seedFresh = true;
@@ -99,6 +102,15 @@ export function save() {
 // salvataggio senza far ripartire la sincronizzazione (per applicare lo stato dal cloud)
 export function saveLocal() {
   localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+// il sistema di sincronizzazione comunica qui il timestamp del cloud appena
+// visto; distinguerlo da __aggiornatoAl (ultime MODIFICHE locali) permette di
+// capire se ci sono modifiche non ancora spedite o se il cloud e' piu' fresco.
+export function segnaCloudVisto(v) {
+  if (!v) return;
+  state.__cloudVisto = v;
+  saveLocal();
 }
 
 // applica lo stato arrivato dal cloud (gia' validato come oggetto JSON)

@@ -80,6 +80,7 @@ export function init() {
   }
   sync.onStatus(mostraStatoSync);
   sync.onRemoteChange(() => { mostraBannerRemoto(); });
+  sync.onCloudVisto(store.segnaCloudVisto);
   aggiornaPannelloSync();
   $("#chiudi-modale").addEventListener("click", chiudiModale);
   $("#modale").addEventListener("click", (e) => {
