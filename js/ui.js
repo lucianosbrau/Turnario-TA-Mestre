@@ -304,6 +304,7 @@ function renderSo() {
       }
       html += `<td class="num ${n < 3 ? "critico" : ""}">${n}</td>`;
     }
+    html += `<td class="tot turni-mese"></td>`;
   }
   html += `<td class="tot"></td></tr>`;
   html += "</tbody>";
