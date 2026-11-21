@@ -119,7 +119,7 @@ function mostraStatoSync(stato, dettaglio) {
     "erroe": ["Errore di sincronizzazione", ""],
     "errore": ["Errore di sincronizzazione", ""],
     "in-attesa": ["Modifiche da salvare online…", ""],
-    "sincronizzato": ["Sincronizzato ✓", ""],
+    "sincronizzato": ["Sincronizzato ✓ " + ora, ""],
   };
   const [testo, cls] = map[stato] || [stato, ""];
   el.textContent = testo;
