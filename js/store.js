@@ -197,6 +197,12 @@ export function cambioRpDefinitivo(personId, nuovoRp, dalIso) {
       s.al = isoSottrai(dalIso);
     }
   }
+  // il RP base (p.rp) e' quello ATTUALE: per rispettare la decorrenza si
+  // archivia anche il rp VECCHIO valido fino al giorno prima, cosi' i mesi
+  // precedenti continuano a seguire il vecchio salto turno
+  if (p.rp && p.rp !== nuovoRp) {
+    state.rpStorico.push({ p: personId, rp: p.rp, dal: null, al: isoSottrai(dalIso) });
+  }
   state.rpStorico.push({ p: personId, rp: nuovoRp, dal: dalIso, al: null });
   p.rp = nuovoRp;
   save();

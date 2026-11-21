@@ -212,7 +212,8 @@ export function programmaPush(runLocalmente, leggiStato) {
         }
       } catch { /* lettura non riuscita: prosegue il push normale */ }
       await salva(leggiStato());
-    } finally { inCorsa = false; timer = null; }   // timer azzerato: il polling live puo' continuare
+    } catch (e) { status("errore", "Invio non riuscito: riprovera' appena possibile."); }
+    finally { inCorsa = false; timer = null; }   // timer azzerato: il polling live puo' continuare
   }, 2500);
 }
 
@@ -293,6 +294,11 @@ async function controlloLive() {
 // all'avvio: scarica e, se il cloud e' piu' recente, applicalo
 export async function avvio(applicaStato, statoLocale, seedVergine) {
   if (!attivo()) { status("spenta"); return; }
+  try { await avvioInterno(applicaStato, statoLocale, seedVergine); }
+  catch (e) { status("errore", "Connessione non riuscita all'avvio: riprovera\u2019 ai prossimi controlli."); }
+}
+
+async function avvioInterno(applicaStato, statoLocale, seedVergine) {
   const vergine = typeof seedVergine === "function" ? seedVergine() : seedVergine;
   if (!codiceLink) leggiCodiceDaUrl();
   applicaStatoCb = applicaStato;
@@ -338,6 +344,17 @@ async function sincronizza(rem, applicaStato, statoLocale) {
   const tMut = ((locale && locale.__aggiornatoAl) + "" || "").slice(0, 23);
   const tRem = (rem.aggiornato_al + "").slice(0, 23);
   if (!tVisto) {
+    // prima sincronizzazione con il nuovo schema. Se ci sono modifiche locali
+    // GIA' FATTE e mai spedita (es. compilate offline durante un aggiornamento
+    // dell'app) si uniscono al cloud e si spediscono: non si buttano mai.
+    if (tMut) {
+      const unito = unisciStato(statoLocale(), rem.stato);
+      await salva(unito);
+      if (applicaStatoCb) { try { applicaStatoCb(unito); } catch {} }
+      visto(rem.aggiornato_al);
+      status("sincronizzato", "Le modifiche fatte senza connessione sono state unite al cloud.");
+      return;
+    }
     applicaStato(rem.stato);
     visto(rem.aggiornato_al);
     status("sincronizzato", "Archivio aggiornato dal cloud.");
