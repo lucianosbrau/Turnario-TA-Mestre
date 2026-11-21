@@ -70,8 +70,8 @@ Anno di partenza: **2027**.
     (celle vuote + SO + R, riposi e assenze esclusi), PERSONALE MESTRE
     (come sopra ma senza i rinforzi R), **ASSENZE TOTALI (RP + L)**
     (riga gialla: riposi e licenze), LICENZE, RINFORZI, IN RP,
-    AUTISTI (solo chi in anagrafica ha 3° o 4°), CAPI (gradi CS, CSE,
-    CR, CRE; anche questa riga conta la presenza in sede, quindi senza
+    AUTISTI (solo chi in anagrafica ha 3° o 4°), CAPI AUTISTI (3°/4°
+e grado capo), CAPI (gradi CS, CSE, CR, CRE; anche questa riga conta la presenza in sede, quindi senza
     i rinforzi R), AS, AG, SO115 (conta chi ha la spunta SO115 in anagrafica,
     non la causale SO).
   - **Evidenza delle criticita'**: la cella del conteggio diventa rossa se

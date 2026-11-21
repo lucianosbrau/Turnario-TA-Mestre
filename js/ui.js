@@ -237,6 +237,21 @@ function renderSo() {
   persone.forEach(p => { html += rigaPersona(p, false, false); });
   const esterni = (s.soRinforzi || []).slice();
   esterni.forEach((p, i) => { html += rigaPersona(p, true, i === 0 && persone.length > 0); });
+  // conteggio in basso: per ogni turno, quanti operatori hanno la causale SO
+  const tutti = [...persone, ...esterni];
+  html += `<tr class="effettivi"><td class="stick1" colspan="3">TURNI SO (operatori in sala)</td>`;
+  for (const g of mesi) {
+    html += `<td class="rpmese"></td>`;
+    for (const t of g.turni) {
+      let n = 0;
+      for (const p of tutti) {
+        if (!esterni.includes(p) && !attivoIn(p, t.date)) continue;
+        if ((cmap[cellKey(p.id, t.date)] || "") === "SO") n++;
+      }
+      html += `<td class="num ${n < 3 ? "critico" : ""}">${n}</td>`;
+    }
+  }
+  html += `<td class="tot"></td></tr>`;
   html += "</tbody>";
   tb.innerHTML = html;
 
@@ -803,6 +818,8 @@ function renderPresenze() {
     { etichetta: "AUTISTI (3° e 4°)",
       filtro: (p, t) => (p.autista === "3°" || p.autista === "4°") && presenteSede(s, p, t, cmap),
       critico: (n) => n < 5, motivo: "autisti presenti sotto 5" },
+    { etichetta: "CAPI AUTISTI (3° e 4°)",
+      filtro: (p, t) => (p.autista === "3°" || p.autista === "4°") && GRADI_CAPI.includes(p.grado) && presenteSede(s, p, t, cmap) },
     { etichetta: "CAPI",
       filtro: (p, t) => GRADI_CAPI.includes(p.grado) && presenteSede(s, p, t, cmap),
       critico: (n) => n < 3, motivo: "capi in turno sotto 3" },
@@ -974,7 +991,7 @@ function menuCausale(anchor, pid, date, pagina) {
   menu.style.left = Math.min(anchor.getBoundingClientRect().left, window.innerWidth - 180) + "px";
   menu.style.top = anchor.getBoundingClientRect().bottom + window.scrollY + 2 + "px";
   // nella Sala Operativa l'unica causale ammessa e' SO
-  const opzioni = pagina === "so" ? ["", "SO"] : ["", ...Object.keys(CAUSALI).filter(c => c !== "RP" && c !== "SO")];
+  const opzioni = pagina === "so" ? ["", "SO", "L", "Mis"] : ["", ...Object.keys(CAUSALI).filter(c => c !== "RP" && c !== "SO")];
   menu.innerHTML = opzioni.map(c =>
     `<button data-c="${c}">${c === "" ? "\u25aa vuoto (in turno)" : c + " \u2014 " + CAUSALI[c].label}</button>`).join("");
   document.body.appendChild(menu);
