@@ -112,7 +112,7 @@ td.aut { text-align: center; }
 .lg b {
   padding: 1px 7px; border-radius: 6px; background: #fff; color: var(--testo); font-weight: 700;
 }
-.lg.c-L b { background: #d7ecd9; } .lg.c-Mis b { background: #d6e4f7; } .lg.c-M b { background: #f6d7d5; }
+.lg.c-L b { background: #3fd14f; border: 1px solid #101010; } .lg.c-Mis b { background: #d6e4f7; } .lg.c-M b { background: #f6d7d5; }
 .lg.c-SO b { background: #e9dcf5; } .lg.c-R b { background: #d3eef1; } .lg.c-RP b { background: #ffe08a; }
 
 /* la pagina Presenze sfrutta tutta la larghezza del monitor (anche curvi/ultra-wide);
@@ -137,7 +137,7 @@ td.aut { text-align: center; }
 #lenzuolo td.cella, #lenzuolo-so td.cella{ cursor: pointer; min-width: 27px; font-weight: 700; }
 #lenzuolo td.cella:hover, #lenzuolo-so td.cella:hover{ outline: 2px solid var(--scuro); outline-offset: -2px; }
 #lenzuolo td.cella.v-RP, #lenzuolo-so td.cella.v-RP{ background: var(--giallo-rp); color: #4a3b00; }
-#lenzuolo td.cella.v-L, #lenzuolo-so td.cella.v-L{ background: #d7ecd9; color: #1c5c20; }
+#lenzuolo td.cella.v-L, #lenzuolo-so td.cella.v-L{ background: #3fd14f; color: #07330d; border: 2px solid #101010; }
 #lenzuolo td.cella.v-Mis, #lenzuolo-so td.cella.v-Mis{ background: #d6e4f7; color: #0d47a1; }
 #lenzuolo td.cella.v-M, #lenzuolo-so td.cella.v-M{ background: #f6d7d5; color: #a51208; }
 #lenzuolo td.cella.v-SO, #lenzuolo-so td.cella.v-SO{ background: #e9dcf5; color: #54107e; }
@@ -307,3 +307,7 @@ button.verde:hover { box-shadow: 0 4px 14px rgba(31,157,85,.4); }
 /* sala operativa: riepilogo turni SO del mese e divisione personale esterno (v0.14.1) */
 #lenzuolo-so td.turni-mese { background: var(--grigio); font-weight: 700; }
 #lenzuolo-so tr.so-separatore td { border-top: 3px solid #8fa1ad; }
+
+/* Sala Operativa: spazio sotto la tabella e righe più alte del 30% */
+#lenzuolo-so { margin-bottom: 18px; }
+#lenzuolo-so th, #lenzuolo-so td { padding-top: 4px; padding-bottom: 4px; }

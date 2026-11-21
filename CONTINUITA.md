@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.16.0. Ultima versione pubblicata: **0.16.0**.
+Data di riferimento: fine v0.17.0. Ultima versione pubblicata: **0.17.0**.
 
 **Sala Operativa (v0.14.0)**: pulsante verde in coda alla barra della home,
 routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
@@ -109,10 +109,11 @@ banner delle criticità si aggiorna (vedi sotto).
 5. RINFORZI (R)
 6. IN RP (celle vuote che coincidono con lo slot RP)
 7. **AUTISTI (3° e 4°)** — solo `p.autista ∈ {"3°","4°"}` E `presenteSede`; critico se < 5
-8. **CAPI** (gradi CS/CSE/CR/CRE) — `presenteSede` (decisione confermata dall'utente: conta chi è in sede, rinforzi esclusi); critico se < 3
-9. AS presenti — spec AS + `presenteSede`
-10. AG presenti — spec AG + `presenteSede`
-11. SO115 presenti — **spunta SO115 in anagrafica** (NON la causale SO) + `presenteSede`; critico se < 5
+8. **CAPI AUTISTI (3° e 4° con grado CS/CSE/CR/CRE)**, nessun alert
+9. **CAPI** (gradi CS/CSE/CR/CRE) — `presenteSede` (decisione confermata dall'utente: conta chi è in sede, rinforzi esclusi); critico se < 3
+10. AS presenti — spec AS + `presenteSede`
+11. AG presenti — spec AG + `presenteSede`
+12. SO115 presenti — **spunta SO115 in anagrafica** (NON la causale SO) + `presenteSede`; critico se < 5
 
 **Evidenza criticità**: cella rossa (`td.num.critico`); banner unico
 chiudibile con "x" che elenca **tutte** le criticità future con data
@@ -243,3 +244,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.15.1 | Sala Operativa a larghezza piena (max-width rimosso) |
 | v0.15.2 | CORREZIONE CRITICA CSS: i selettori del lenzuolo, corrotti in v0.14.0 da una sostituzione in blocco errata ('#lenzuolo X' era diventato '#lenzuolo, #lenzuolo-so X',applicando le regole a TUTTA la tabella e perdendo i colori delle celle: pagina rosa/rossa, evidenziazione rotta), sono stati rigenerati dalla v0.13.1 estendendoli correttamente a #lenyuolo-so a coppie complete |
 | v0.16.0 | Esporta backup: scheda con scelta dei fogli; export Excel (SpreadsheetML .xml, nessuna libreria) di Presenze e/o Sala Operativa + backup JSON invariato |
+| v0.17.0 | riga CAPI AUTISTI (3/4° con grado capo) dopo AUTISTI; L più accesa con bordo nero; SO: causali L e Mis, riepilogo TURNI SO (<3 rosso), righe +30% e spazio per la scrollbar; tolta frase help |
