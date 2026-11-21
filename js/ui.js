@@ -81,6 +81,7 @@ export function init() {
   sync.onStatus(mostraStatoSync);
   sync.onRemoteChange(() => { mostraBannerRemoto(); });
   sync.onCloudVisto(store.segnaCloudVisto);
+  sync.onBusy(() => { const m = $("#modale"); return !!m && m.style.display === "flex"; });
   aggiornaPannelloSync();
   $("#chiudi-modale").addEventListener("click", chiudiModale);
   $("#modale").addEventListener("click", (e) => {
@@ -100,9 +101,9 @@ function mostraBannerRemoto() {
   const b = document.createElement("div");
   b.id = "banner-remoto";
   b.className = "banner-remoto";
-  b.innerHTML = `<b>Attenzione:</b> il cloud è stato aggiornato da un altro dispositivo mentre eri collegato.
-    Le sue modifiche si uniranno automaticamente al tuo prossimo salvataggio;
-    per vederle subito <button id="banner-remoto-ricarica" class="aiuto-btn">ricarica la pagina</button>.
+  b.innerHTML = `<b>Attenzione:</b> ci sono novità arrivate dal cloud mentre eri collegato.
+    Appena chiudi la finestra aperta (o salvi le tue modifiche) l'archivio si aggiornerà da solo;
+    per forzarlo subito <button id="banner-remoto-ricarica" class="aiuto-btn">ricarica la pagina</button>.
     <button id="banner-remoto-x" class="banner-x" title="Chiudi">✕</button>`;
   document.body.appendChild(b);
   $("#banner-remoto-x").onclick = () => b.remove();

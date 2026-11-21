@@ -20,6 +20,8 @@ let remoteChangeCb = null;  // avviso: il cloud e' cambiato mentre l'app e' aper
 let vistoCb = null;          // per salvare nel proprio archivio il timestamp del cloud visto
 let ultimoCloudVisto = null; // aggiornato_al del cloud come l'abbiamo visto l'ultima volta
 let applicaStatoCb = null;  // per applicare lo stato unito dopo il push
+let statoLocaleCb = null;   // per leggere l'archivio locale dal polling
+let busyCb = null;          // l'interfaccia dice se una finestra e' aperta (non toccare allora)
 let pollTimer = null;
 
 export const attivo = () => !!(SUPABASE_URL && SUPABASE_ANON_KEY);
@@ -27,6 +29,7 @@ export const attivo = () => !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 export function onStatus(cb) { statusCb = cb; }
 export function onRemoteChange(cb) { remoteChangeCb = cb; }
 export function onCloudVisto(cb) { vistoCb = cb; }
+export function onBusy(cb) { busyCb = cb; }
 
 // registra il momento del cloud che abbiamo appena visto (in sessione e nell'archivio locale)
 function visto(v) {
@@ -234,20 +237,52 @@ function unisciStato(locale, rem) {
 // controllo periodico: il cloud e' cambiato mentre l'app e' aperta?
 function avviaPolling() {
   if (pollTimer) return;
-  pollTimer = setInterval(async () => {
-    if (!attivo() || inCorsa || timer) return;   // niente controlli se ci sono salvataggi in coda
-    if (!codiceLink && !(await credenzialiSalvate())) return;
-    try {
-      const rem = await scarica();
-      if (!rem || !rem.stato) return;
-      const tRem = (rem.aggiornato_al + "").slice(0, 23);
-      const tVisto = (ultimoCloudVisto + "" || "").slice(0, 23);
-      if (tRem !== tVisto) {
-        if (tVisto && remoteChangeCb) remoteChangeCb();
-        ultimoCloudVisto = rem.aggiornato_al;
-      }
-    } catch { /* offline: si riprovera' al prossimo giro */ }
-  }, 90000);
+  const intervallo = Number((typeof globalThis !== "undefined" && globalThis.TURNARIO_POLL_MS)) || 45000;
+  pollTimer = setInterval(controlloLive, intervallo);
+}
+
+// sincronizzazione "viva": finche' l'app e' aperta, scarica le novita' del cloud
+// senza bisogno di ricaricare la pagina. Se e' libera di applicarle (nessuna
+// finestra aperta, nessuna modifica non ancora spedita) lo fa subito; se il
+// cloud e' REGREDITO (un PC vecchio ha pushato) lo cura unendo e rispingendo.
+async function controlloLive() {
+  if (!attivo() || inCorsa || timer) return;   // niente controlli se ci sono salvataggi in coda
+  if (typeof document !== "undefined" && document.hidden) return;
+  if (!codiceLink) {
+    if (!(await credenzialiSalvate())) return;
+  }
+  try {
+    const rem = await scarica();
+    if (!rem || !rem.stato || !Array.isArray(rem.stato.personale) || rem.stato.personale.length === 0) return;
+    const tRem = (rem.aggiornato_al + "").slice(0, 23);
+    const locale = statoLocaleCb ? statoLocaleCb() : null;
+    if (!locale) return;
+    const tVisto = ((locale && locale.__cloudVisto) + "" || "").slice(0, 23);
+    const tMut = ((locale && locale.__aggiornatoAl) + "" || "").slice(0, 23);
+    if (tRem === tVisto) return;                 // nessuna novita'
+    if (!tVisto) { visto(rem.aggiornato_al); return; }  // avvio non ancora completato
+    const occupato = busyCb ? busyCb() : false;
+    if (tMut > tVisto || occupato) {
+      // modifiche locali non ancora spedite o finestra aperta: non si tocca
+      // l'archivio adesso (il push le unira'; con la finestra chiusa il prossimo
+      // giro le applichera'). Avviso l'utente.
+      if (remoteChangeCb) remoteChangeCb();
+      return;
+    }
+    if (tRem > tVisto) {
+      // il cloud e' piu' fresco: si applica subito
+      if (applicaStatoCb) { try { applicaStatoCb(rem.stato); } catch {} }
+      visto(rem.aggiornato_al);
+      status("sincronizzato", "Aggiornato dal cloud mentre l'app era aperta.");
+      return;
+    }
+    // cloud REGREDITO: qualcuno ha pushato dati vecchi sopra quello buono.
+    // Si uniscono le causali/rinforzi e si rispinge lo stato unito.
+    const unito = unisciStato(locale, rem.stato);
+    await salva(unito);
+    if (applicaStatoCb) { try { applicaStatoCb(unito); } catch {} }
+    status("sincronizzato", "Il cloud conteneva dati piu' vecchi: uniti e corretti.");
+  } catch { /* offline: si riprovera' al prossimo giro */ }
 }
 
 // all'avvio: scarica e, se il cloud e' piu' recente, applicalo
@@ -256,6 +291,7 @@ export async function avvio(applicaStato, statoLocale, seedVergine) {
   const vergine = typeof seedVergine === "function" ? seedVergine() : seedVergine;
   if (!codiceLink) leggiCodiceDaUrl();
   applicaStatoCb = applicaStato;
+  statoLocaleCb = statoLocale;
   avviaPolling();
   if (codiceLink) {
     status("in-attesa");
