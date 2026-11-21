@@ -64,13 +64,20 @@ ok(applicato && (applicato.causali[2027] || []).some(c => c.d === '2027-05-06' &
   '(L1b) la causale SO dell\'altro dispositivo e\' arrivata');
 ok(archivio.__cloudVisto.slice(0, 23) === '2027-05-02T09:00:00.000', '(L1c) __cloudVisto aggiornato al momento del cloud');
 
-// L2: ho una modifica locale non ancora spedita: il polling NON mi tocca l'archivio
+// L2: ho una modifica locale non ancora spedita (invio fallito/offline):
+// il polling non applica il cloud sopra, ma RISPEDE le mie modifiche unendole al cloud
 archivio.__aggiornatoAl = '2027-05-03T12:00:00.000Z';   // non ancora spinta (dopo il visto)
 archivio.causali[2027].push({ p: 'IO', d: '2027-05-07', c: 'Mis' });
-rispostaCloud = { stato: { personale: [{ id: 'IO' }], causali: {} }, aggiornato_al: '2027-05-03T13:00:00.000Z' };
-applicato = null; bannerChiamato = 0;
-await sleep(900);
-ok(!applicato && bannerChiamato > 0, '(L2) con modifiche mie non ancora spedite il polling non applica sopra, avvisa col banner');
+rispostaCloud = { stato: { personale: [{ id: 'IO' }], causali: { 2027: [{ p: 'IO', d: '2027-05-06', c: 'SO' }] } }, aggiornato_al: '2027-05-03T13:00:00.000Z' };
+applicato = null; bannerChiamato = 0; ultimaScrittura = null;
+await sleep(400);
+const senzaBannerQua = bannerChiamato === 0;
+await sleep(3200);
+ok(!!ultimaScrittura, '(L2) modifiche non ancora spedite: il polling le rispedisce da solo (restore invii falliti)');
+const causL2 = ultimaScrittura ? ultimaScrittura.causali[2027] : [];
+ok(causL2.some(c => c.d === '2027-05-07' && c.c === 'Mis'), '(L2b) la mia causale Mis non spedita arriva al cloud');
+ok(causL2.some(c => c.d === '2027-05-06' && c.c === 'SO'), '(L2c) la causale SO dell\'altro dispositivo si unisce, non si cancella');
+ok(senzaBannerQua, '(L2d) niente banner se non serve (invio automatico)');
 
 // L3: finestra aperta: il polling non tocca l'archivio e avvisa
 occupato = true;
