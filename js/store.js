@@ -28,7 +28,7 @@ function load() {
       let parsed;
       try { parsed = JSON.parse(raw); } catch { parsed = null; }
       if (parsed && parsed.__appVersion !== APP_VERSION) {
-        localStorage.setItem(KEY + "-snapshot", raw);
+        archiviaSnapshot(raw);
       }
       if (!parsed) { state = seedInit(); seedFresh = true; } else { state = parsed; }
       migrAutista();
@@ -106,7 +106,7 @@ export function applicaStatoCloud(stato) {
   seedFresh = false;
   if (!stato || !Array.isArray(stato.personale)) throw new Error("Archivio cloud non valido");
   const raw = localStorage.getItem(KEY);
-  if (raw) localStorage.setItem(KEY + "-snapshot", raw);   // al sicuro prima di toccare
+  if (raw) archiviaSnapshot(raw);   // al sicuro prima di toccare
   state = stato;
   if (!state.settings) state.settings = { anno: ANNO_DEFAULT };
   state.__appVersion = APP_VERSION;
@@ -215,14 +215,66 @@ export function importJson(testo) {
   save();
 }
 
-// ripristina l'ultima copia di sicurezza (snapshot fatto al cambio versione)
-export function ripristinaSnapshot() {
-  const raw = localStorage.getItem(KEY + "-snapshot");
-  if (!raw) return false;
-  state = JSON.parse(raw);
+// storico delle copie di sicurezza: ogni volta che l'archivio sta per essere
+// sovrascritto (nuova versione dell'app o stato dal cloud) la copia precedente
+// viene ARCHIVIATA con data, non cancellata, finche' c'e' spazio.
+const SNAP_KEY = KEY + "-storico";
+const SNAP_MAX_N = 10;
+const SNAP_MAX_BYTES = 2000000;
+
+function leggiStorico() {
+  try { return JSON.parse(localStorage.getItem(SNAP_KEY) || "[]") || []; }
+  catch { return []; }
+}
+
+function archiviaSnapshot(raw) {
+  if (!raw) return;
+  try {
+    const arch = leggiStorico();
+    if (arch.length && arch[arch.length - 1].raw === raw) return;
+    arch.push({ t: new Date().toISOString(), raw });
+    let s = JSON.stringify(arch);
+    while (arch.length > 1 && (arch.length > SNAP_MAX_N || s.length > SNAP_MAX_BYTES)) {
+      arch.shift();
+      s = JSON.stringify(arch);
+    }
+    localStorage.setItem(SNAP_KEY, s);
+  } catch { /* storage pieno: mantengo solo l'ultima */
+    try { localStorage.setItem(KEY + "-snapshot", raw); } catch {}
+  }
+}
+
+// elenco delle copie archiviate (dalla piu' vecchia alla piu' recente)
+export function listaSnapshots() {
+  return leggiStorico().map(s => {
+    let nPers = 0;
+    try { nPers = (JSON.parse(s.raw).personale || []).length; } catch {}
+    return { t: s.t, nPers };
+  });
+}
+
+// ripristina una copia specifica dello storico (indice come in listaSnapshots)
+export function ripristinaDaSnapshot(idx) {
+  const arch = leggiStorico();
+  if (idx < 0 || idx >= arch.length) return false;
+  state = JSON.parse(arch[idx].raw);
   state.__appVersion = APP_VERSION;
   save();
   return true;
+}
+
+// ripristina l'ultima copia di sicurezza (snapshot fatto al cambio versione)
+export function ripristinaSnapshot() {
+  const arch = leggiStorico();
+  if (!arch.length) {
+    const raw = localStorage.getItem(KEY + "-snapshot");
+    if (!raw) return false;
+    state = JSON.parse(raw);
+    state.__appVersion = APP_VERSION;
+    save();
+    return true;
+  }
+  return ripristinaDaSnapshot(arch.length - 1);
 }
 
 export function resetToSeed() {
