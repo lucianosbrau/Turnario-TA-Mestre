@@ -45,6 +45,7 @@ export function turniAnno(anno) {
 
 // Persona attiva in una data? (dal/al vuoti = sempre)
 export function attivoIn(p, iso) {
+  if (p.eliminato) return false;
   if (p.dal && p.dal > iso) return false;
   if (p.al && p.al < iso) return false;
   return true;

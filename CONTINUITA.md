@@ -5,7 +5,7 @@ di sviluppo assistito o un operatore reale). Contiene le decisioni prese
 insieme all'utente, le regole di business verificate, l'architettura del
 codice e le convenzioni di rilascio. Aggiornarlo a ogni modifica importante.
 
-Data di riferimento: fine v0.18.0. Ultima versione pubblicata: **0.18.0**.
+Data di riferimento: fine v1.0.1. Ultima versione pubblicata: **1.0.1**.
 
 **Sala Operativa (v0.14.0)**: pulsante verde in coda alla barra della home,
 routing `#so`, pagina `#pagina-so` con tabella `#lenzuolo-so`: calendario
@@ -248,3 +248,4 @@ nomi fissi a sinistra durante lo scroll, 12 mesi in fila.
 | v0.17.1 | CORREZIONE CRITICA SINCRONIZZAZIONE: un archivio locale vergine (seed mai modificato) non puo' piu' sovrascrivere il cloud e perde SEMPRE contro un cloud con dati (flag seedFresh in store.js, guarda in sync.avvio); causa della perdita dei dati dell'utente su piu' aggiornamenti |
 | v0.17.2 | URGENTE RECUPERO DATI: aggiunto il pulsante "Ripristina copia di sicurezza" in Home (prima la funzione store.ripristinaSnapshot esisteva ma non era collegata a nessuna UI); legge la chiave localStorage '\<chiave\>-snapshot' scritta da applicaStatoCloud PRIMA di applicare lo stato del cloud. Serve all'utente per recuperare l'archivio locale del PC su cui aveva compilato, sovrascritto dal cloud-seed |
 | v0.18.0 | STORICO COPIE DI SICUREZZA: la singola chiave '-snapshot' (sovrascritta a ogni sync, causa della perdita del backup durante l'incidente) e' sostituita da '-storico' (max 10 copie, ~2MB) con data e numero persone; il pulsante 'Ripristina copia di sicurezza' apre una finestra con l'elenco delle copie e ripristino della selezionata; retrocompatibile con la vecchia '-snapshot' |
+| v1.0.1 | CANCELLAZIONE REVERSIBILE (richiesta esplicita dell'utente: togliendo il filtro Home non vedeva i cancellati): deletePerson ora marca p.eliminato=true senza toccare causali/RP/storico; engine.attivoIn torna SEMPRE false per gli eliminati (spariscono da compilazione, lenzuolo di default, SO, cambio RP e conteggi); Home senza filtro e lenzuolo senza "solo attivi" li mostrano in grigio con dicitura (cancellata); nuova store.recuperaPersona + finestra Cancella personale con elenco "Recupera una persona cancellata"; recupero omonimi esteso agli eliminati. ATTENZIONE: le cancellazioni fatte con versioni <= 0.18.0 restano definitive (i dati erano rimossi fisicamente) |

@@ -200,7 +200,7 @@ function renderHome() {
     const attivo = attivoIn(p, oggi);
     const storico = (s.rpStorico || []).filter(x => x.p === p.id);
     return `<tr class="${attivo ? "" : "uscito"}">
-      <td class="nome">${p.cognome} ${p.nome}</td>
+      <td class="nome">${p.cognome} ${p.nome}${p.eliminato ? " (cancellata)" : ""}</td>
       <td>${p.grado || ""}</td>
       <td class="rp">${rpEffettivo(s, p.id, oggi)}</td>
       <td class="rpbase">(${p.rp})</td>
@@ -229,7 +229,7 @@ function renderSo() {
   $("#so-anno").textContent = a;
 
   const inizioAnno = `${a}-01-01`, fineAnno = `${a}-12-31`;
-  const sky = s.personale.filter(p => p.spec?.SO115 === "Si" && (!p.dal || p.dal <= fineAnno) && (!p.al || p.al >= inizioAnno));
+  const sky = s.personale.filter(p => !p.eliminato && p.spec?.SO115 === "Si" && (!p.dal || p.dal <= fineAnno) && (!p.al || p.al >= inizioAnno));
   let persone = ordinaPersone(sky);
   if ($("#so-solo-attivi")?.checked === true) persone = persone.filter(p => attivoIn(p, todayIso()));
 
@@ -344,7 +344,7 @@ function apriPersona(id) {
     <div class="azioni-form">
       <button id="fp-salva">Salva</button>
       <button id="fp-annulla">Annulla</button>
-      ${id ? `<button id="fp-elimina" class="distruttivo">Elimina persona e sue presenze</button>` : ""}
+      ${id ? `<button id="fp-elimina" class="distruttivo">Togli dalla compilazione (recuperabile)</button>` : ""}
     </div>`;
   $("#modale").style.display = "flex";
   $("#fp-annulla").onclick = chiudiModale;
@@ -366,10 +366,11 @@ function apriPersona(id) {
       const attivi = doppioni.filter(p => attivoIn(p, todayIso()));
       if (usciti.length && !attivi.length) {
         const u = usciti[0];
-        const rec = confirm(`Attenzione: in archivio c'è già ${cognome} ${nome}, uscita dal turno${u.al ? " il " + isoToIt(u.al) : ""}.
+        const rec = confirm(`Attenzione: in archivio c'è già ${cognome} ${nome}, uscita o cancellata${u.al ? " il " + isoToIt(u.al) : ""}.
 Vuoi recuperarla e renderla di nuovo in servizio? (Il suo storico di presenze resta intatto; con "Annulla" puoi invece inserirla con un nome differente.)`);
         if (rec) {
           u.al = null;
+          delete u.eliminato;
           store.save();
           chiudiModale();
           renderHome();
@@ -416,7 +417,7 @@ Se intendi inserire comunque questa persona, devi nominarla in modo differente. 
     renderHome();
   };
   if (id) $("#fp-elimina").onclick = () => {
-    if (confirm("Eliminare definitivamente questa persona e tutte le sue presenze?")) {
+    if (confirm("Togliere questa persona dalla compilazione? Le sue presenze restano in archivio e puoi recuperarla dalla finestra Cancella personale.")) {
       store.deletePerson(id);
       chiudiModale();
       renderHome();
@@ -467,14 +468,19 @@ function chiudiModale() { $("#modale").style.display = "none"; }
 
 function apriCancellaPersona() {
   const s = store.getState();
-  const persone = ordinaPersone(s.personale);
+  const persone = ordinaPersone(s.personale.filter(p => !p.eliminato));
+  const cancellate = ordinaPersone(s.personale.filter(p => p.eliminato));
   $("#form-persona").innerHTML = `
     <h3>Cancella personale</h3>
-    <p class="aiuto">Le persone selezionate vengono rimosse dall'archivio insieme alle loro presenze e al loro RP.
-    Se invece qualcuno e' solo uscito dal turno, meglio mettergli una data di uscita (dal pulsante Modifica): le presenze restano nello storico.</p>
+    <p class="aiuto">Le persone selezionate spariscono dalla compilazione: presenze e RP restano in archivio e si possono recuperare qui sotto, togliendo anche il filtro della Home.
+    Se invece qualcuno e' solo uscito dal turno (tornerà un giorno), meglio mettergli una data di uscita dal pulsante Modifica.</p>
     <div class="canc-lista">
       ${persone.map(p => `<label class="canc-riga"><input type="checkbox" value="${p.id}"> ${p.cognome} ${p.nome} (${p.grado})</label>`).join("")}
     </div>
+    ${cancellate.length ? `<h3 style="margin-top:10px">Recupera una persona cancellata</h3>
+    <div class="canc-lista">
+      ${cancellate.map(p => `<label class="canc-riga"><button id="rec-${p.id}" class="aiuto-btn">Recupera</button> ${p.cognome} ${p.nome} (${p.grado || ""})</label>`).join("")}
+    </div>` : ""}
     <div class="azioni-form">
       <button id="canc-tutti-sel" class="aiuto-btn">Seleziona tutti</button>
       <button id="canc-ok" class="distruttivo">Cancella definitivamente i selezionati</button>
@@ -487,6 +493,7 @@ function apriCancellaPersona() {
     const tuttiGia = boxes.every(b => b.checked);
     boxes.forEach(b => b.checked = !tuttiGia);
   };
+  cancellate.forEach(c => { const b = $(`#rec-${c.id}`); if (b) b.onclick = () => { store.recuperaPersona(c.id); chiudiModale(); renderHome(); alert(`${c.cognome} ${c.nome} è stata recuperata e è di nuovo in compilazione.`); }; });
   $("#canc-ok").onclick = () => {
     const selezionati = [...$("#form-persona").querySelectorAll('.canc-lista input[type="checkbox"]:checked')]
       .map(b => b.value);
@@ -495,7 +502,7 @@ function apriCancellaPersona() {
       const p = s.personale.find(x => x.id === id);
       return p ? `${p.cognome} ${p.nome}` : "";
     }).filter(Boolean);
-    if (confirm(`Confermi la cancellazione di ${nomi.length === 1 ? "1 persona" : nomi.length + " persone"}: ${nomi.join(", ")}? L'operazione elimina anche tutte le loro presenze e non si puo' annullare.`)) {
+    if (confirm(`Confermi la cancellazione di ${nomi.length === 1 ? "1 persona" : nomi.length + " persone"}: ${nomi.join(", ")}? Le loro presenze restano in archivio: potrai recuperarle da questa finestra.`)) {
       for (const id of selezionati) store.deletePerson(id);
       chiudiModale();
       renderHome();
@@ -506,7 +513,7 @@ function apriCancellaPersona() {
 
 function apriCambioRp() {
   const s = store.getState();
-  const persone = ordinaPersone(s.personale);
+  const persone = ordinaPersone(s.personale.filter(p => !p.eliminato));
   $("#form-persona").innerHTML = `
     <h3>Cambio RP (salto turno)</h3>
     <p class="aiuto">Cambio definitivo con decorrenza: da quella data la persona segue il nuovo salto turno.
