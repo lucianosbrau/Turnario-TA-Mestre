@@ -7,6 +7,13 @@ const KEY = "turnario-ta-v1";
 
 let state = null;
 
+// true se lo stato e' il seed appena caricato e l'utente non ha ancora
+// modificato nulla in questa sessione: un archivio vergine non deve mai
+// sovrascrivere una copia cloud con dati veri
+let seedFresh = false;
+export function isSeedFresh() { return seedFresh; }
+
+
 export function getState() {
   if (!state) load();
   return state;
@@ -23,19 +30,19 @@ function load() {
       if (parsed && parsed.__appVersion !== APP_VERSION) {
         localStorage.setItem(KEY + "-snapshot", raw);
       }
-      state = parsed || seedInit();
+      if (!parsed) { state = seedInit(); seedFresh = true; } else { state = parsed; }
       migrAutista();
       state.__appVersion = APP_VERSION;
       if (!state.settings) { state.settings = { anno: ANNO_DEFAULT }; }
       state.soRinforzi = state.soRinforzi || [];
       save();
     } else {
-      state = seedInit();
-      migrAutista();
+      state = seedInit(); seedFresh = true; migrAutista();
       state.__appVersion = APP_VERSION;
       save();
     }
   } catch {
+    seedFresh = true;
     state = seedInit();
     migrAutista();
     state.__appVersion = APP_VERSION;
@@ -62,6 +69,7 @@ function seedInit() {
 
 // personale di rinforzo esterno: esiste SOLO nella pagina Sala Operativa
 export function addSoRinforzo(dati) {
+  seedFresh = false;
   if (!state.soRinforzi) state.soRinforzi = [];
   const p = {
     id: "soext-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7),
@@ -74,6 +82,7 @@ export function addSoRinforzo(dati) {
 }
 
 export function deleteSoRinforzo(id) {
+  seedFresh = false;
   state.soRinforzi = (state.soRinforzi || []).filter(x => x.id !== id);
   for (const anno of Object.keys(state.causali || {})) {
     if (state.causali[anno]) state.causali[anno] = state.causali[anno].filter(x => x.p !== id);
@@ -84,7 +93,7 @@ export function deleteSoRinforzo(id) {
 export function save() {
   state.__aggiornatoAl = new Date().toISOString();
   localStorage.setItem(KEY, JSON.stringify(state));
-  sync.programmaPush(saveLocal, () => JSON.parse(localStorage.getItem(KEY)));
+  if (!seedFresh) sync.programmaPush(saveLocal, () => JSON.parse(localStorage.getItem(KEY)));
 }
 
 // salvataggio senza far ripartire la sincronizzazione (per applicare lo stato dal cloud)
@@ -94,6 +103,7 @@ export function saveLocal() {
 
 // applica lo stato arrivato dal cloud (gia' validato come oggetto JSON)
 export function applicaStatoCloud(stato) {
+  seedFresh = false;
   if (!stato || !Array.isArray(stato.personale)) throw new Error("Archivio cloud non valido");
   const raw = localStorage.getItem(KEY);
   if (raw) localStorage.setItem(KEY + "-snapshot", raw);   // al sicuro prima di toccare
@@ -109,6 +119,7 @@ export function newId() {
 }
 
 export function addPerson(p) {
+  seedFresh = false;
   p.id = newId();
   state.personale.push(p);
   save();
@@ -116,12 +127,14 @@ export function addPerson(p) {
 }
 
 export function updatePerson(p) {
+  seedFresh = false;
   const i = state.personale.findIndex(x => x.id === p.id);
   if (i >= 0) state.personale[i] = p;
   save();
 }
 
 export function deletePerson(id) {
+  seedFresh = false;
   state.personale = state.personale.filter(x => x.id !== id);
   state.rpStorico = (state.rpStorico || []).filter(x => x.p !== id);
   state.exceptions = (state.exceptions || []).filter(x => x.p !== id);
@@ -139,6 +152,7 @@ export function mappaCausali(anno) {
 }
 
 export function setCausale(anno, personId, date, codice) {
+  seedFresh = false;
   if (!state.causali) state.causali = {};
   if (!state.causali[anno]) state.causali[anno] = [];
   const arr = state.causali[anno];
@@ -152,6 +166,7 @@ export function setCausale(anno, personId, date, codice) {
 
 // cambio RP definitivo con decorrenza -> chiude il precedente e ne apre uno nuovo
 export function cambioRpDefinitivo(personId, nuovoRp, dalIso) {
+  seedFresh = false;
   const p = state.personale.find(x => x.id === personId);
   if (!p) return;
   // chiudo gli intervalli aperti che contengono la nuova data
@@ -167,6 +182,7 @@ export function cambioRpDefinitivo(personId, nuovoRp, dalIso) {
 
 // cambio RP solo per un mese (eccezione)
 export function setEccezioneMese(personId, mese, rp) {
+  seedFresh = false;
   state.exceptions = state.exceptions || [];
   const i = state.exceptions.findIndex(e => e.p === personId && e.mese === mese);
   if (!rp) { if (i >= 0) state.exceptions.splice(i, 1); }

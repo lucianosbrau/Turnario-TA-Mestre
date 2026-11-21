@@ -51,7 +51,8 @@ export function init() {
   mostraPagina();
   sync.avvio(
     (stato) => { try { store.applicaStatoCloud(stato); render(); } catch (e) { alert("Archivio cloud non valido: uso quello locale."); } },
-    () => JSON.parse(localStorage.getItem("turnario-ta-v1") || "null")
+    () => JSON.parse(localStorage.getItem("turnario-ta-v1") || "null"),
+    () => store.isSeedFresh()
   );
 }
 
@@ -122,7 +123,8 @@ function aggiornaPannelloSync() {
       if (ok) {
         await sync.avvio(
           (stato) => { try { store.applicaStatoCloud(stato); render(); } catch (e) { alert("Archivio cloud non valido: uso quello locale."); } },
-          () => JSON.parse(localStorage.getItem("turnario-ta-v1") || "null")
+          () => JSON.parse(localStorage.getItem("turnario-ta-v1") || "null"),
+          () => store.isSeedFresh()
         );
         aggiornaPannelloSync();
         renderHome();
