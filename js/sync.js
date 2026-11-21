@@ -174,13 +174,14 @@ export function programmaPush(runLocalmente, leggiStato) {
 // all'avvio: scarica e, se il cloud e' piu' recente, applicalo
 export async function avvio(applicaStato, statoLocale, seedVergine) {
   if (!attivo()) { status("spenta"); return; }
+  const vergine = typeof seedVergine === "function" ? seedVergine() : seedVergine;
   if (!codiceLink) leggiCodiceDaUrl();
   if (codiceLink) {
     status("in-attesa");
     const rem = await scarica();
     // archivio locale vergine (seed non ancora modificato): se il cloud ha
     // dati veri vince SEMPRE il cloud; un seed non puo' sovrascrivere il lavoro
-    if (rem && rem.stato && Array.isArray(rem.stato.personale) && rem.stato.personale.length > 0 && seedVergine) {
+    if (rem && rem.stato && Array.isArray(rem.stato.personale) && rem.stato.personale.length > 0 && vergine) {
       applicaStato(rem.stato);
       status("sincronizzato", "Archivio recuperato dal cloud.");
       return;
