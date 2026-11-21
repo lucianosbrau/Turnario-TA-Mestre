@@ -1,0 +1,21 @@
+name: Collaudi automatici
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  collaudi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Strumenti di collaudo (esbuild, jsdom, c8)
+        run: npm install --no-save esbuild jsdom c8
+      - name: Tutte le suite
+        run: sh test/run.sh
+      - name: Copertura del codice critico (sync, store, engine, lock)
+        run: sh test/run.sh --coverage

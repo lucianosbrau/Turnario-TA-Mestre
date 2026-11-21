@@ -55,6 +55,10 @@ lancia tutte le suite e stampa PASS/FAIL per ogni controllo.
   con data e motivo, visibile solo dopo l'inserimento di una causale.
 - `reg-disastro.mjs` — teatro del disastro: PC-A compila offline, PC-B vergine
   apre, B salva, A rientra online: nessuna causale nè nominativo perso.
+- `reg-oggi.mjs` — todayIso usa la DATA LOCALE (Europe/Rome): alle 00:30
+  italiane la data UTC e' ancora ieri e il lenzuolo non deve spostarsi.
+- `reg-errorlog.mjs` — log errori di produzione: un invio per tipo ogni 30s,
+  solo dati diagnostici, un fallimento di rete non rompe mai l'app.
 - `reg-sync-live.mjs` — sincronizzazione "viva" mentre l'app e' aperta:
   le novita' del cloud si applicano da sole (niente F5), con una finestra
   aperta o modifiche non ancora spedita si aspetta e avvisa col banner,
@@ -62,6 +66,12 @@ lancia tutte le suite e stampa PASS/FAIL per ogni controllo.
 
 Il piano completo (inventario delle funzioni, mappa di copertura, bug storici
 trovati con questo metodo) e' in PIANO-COLLAUDI.md.
+
+Copertura: `sh test/run.sh --coverage` misura con c8 le righe eseguite dei
+moduli critici (sync, store, engine, lock). In CI (GitHub Actions,
+.github/workflows/collaudi.yml) le suite girano a ogni push/PR e la copertura
+viene pubblicata nel log: se una suite fallisce la check diventa rossa
+(attivare la branch protection per rendere il blocco effettivo su main).
 
 ## Convenzioni
 

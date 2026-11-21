@@ -55,9 +55,29 @@ Esecuzione di tutto: `sh test/run.sh` (vedi README.md per i prerequisiti).
 3. Aggiornare questo file se cambia l'inventario o la copertura.
 4. Aggiornare APP_VERSION (js/config.js) e CACHE (sw.js) INSIEME (reg-statico lo verifica).
 
+## Estensioni decise con l'utente (2025-12, secondo giro di critica)
+
+- reg-oggi.mjs: todayIso con data LOCALE Europe/Rome (bloccato a collaudo:
+  il sospetto UTC si e' rivelato infondato nel codice attuale, il test
+  impedisce che lo diventi in futuro).
+- reg-errorlog.mjs + js/errorlog.js: errori JS della PWA spediti alla tabella
+  Supabase turnario_log (solo versione/messaggio/pagina; max 1 invio ogni
+  30s per tipo; mai dati del registro; fallimenti silenziosi).
+- .github/workflows/collaudi.yml: CI a ogni push/PR su main; per il blocco
+  effettivo serve la branch protection attivata dall'utente.
+- run.sh --coverage: copertura c8 dei moduli critici (sync, store, engine,
+  lock): la mappa fatta a mano resta per l'inventario, il numero no.
+- TODO concordati: progetto Supabase di TEST per le suite RLS/codice-link
+  (punto 2), Playwright su browser reale con service worker/offline e due
+  contesti per due PC (punto 5).
+
 ## Limiti dichiarati (onestà)
 
 - I collaudi verificano la logica, non i pixel: l'aspetto resta verifica umana.
+- jsdom non esegue il service worker: cache/aggiornamento/offline reale restano
+  territorio di Playwright (punto 5, da fare).
+- Supabase e' simulato con stub nelle suite sync: RLS e codice-link veri
+  restano territorio del progetto di test (punto 2, da fare).
 - L'export Excel (SpreadsheetML) e' coperto solo parzialmente (struttura statica):
   da aggiungere una suite dedicata quando si tocca esportaExcel().
 - L'ordine alfabetico/deletto del personale merita una suite dedicata dedicata.
