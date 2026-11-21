@@ -135,13 +135,23 @@ export function updatePerson(p) {
 
 export function deletePerson(id) {
   seedFresh = false;
-  state.personale = state.personale.filter(x => x.id !== id);
-  state.rpStorico = (state.rpStorico || []).filter(x => x.p !== id);
-  state.exceptions = (state.exceptions || []).filter(x => x.p !== id);
-  for (const anno of Object.keys(state.causali || {})) {
-    state.causali[anno] = (state.causali[anno] || []).filter(x => x.p !== id);
-  }
+  const p = state.personale.find(x => x.id === id);
+  if (!p || p.eliminato) return;
+  p.eliminato = true;   // cancellazione reversibile: sparisce dalla compilazione, i dati restano
   save();
+}
+
+export function recuperaPersona(id) {
+  seedFresh = false;
+  const p = state.personale.find(x => x.id === id);
+  if (!p || !p.eliminato) return;
+  delete p.eliminato;
+  if (p.al && p.al < todayIsoSafe()) p.al = null;
+  save();
+}
+
+function todayIsoSafe() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 // causali di un anno -> mappa { "personaId|data": codice }
