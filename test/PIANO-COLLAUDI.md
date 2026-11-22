@@ -22,7 +22,7 @@ Esecuzione di tutto: `sh test/run.sh` (vedi README.md per i prerequisiti).
 | 10 | Banner criticità future (unico, con data e motivo, solo dopo inserimento causale) | reg-conteggi-soglie (inserimento simulato: clic cella -> menu -> L) |
 | 11 | Home: filtro "solo in servizio", toggle, usciti/cancellati in grigio | reg-cancellazione |
 | 12 | Cancellazione reversibile + recupero (finestra Cancella personale) | reg-cancellazione |
-| 13 | Recupero omonimi uscuti/cancellati all'inserimento | reg-cancellazione (flusso modale), Inserimento omonimi: parzialmente in reg-cancellazione; da rafforzare (v. buchi) |
+| 13 | Recupero omonimi usciti/cancellati all'inserimento | reg-cancellazione (flusso modale), reg-omonimi (recupero uscito, nome diverso per doppi attivi, annullamento) |
 | 14 | Sala Operativa: solo SO115, causali SO/L/Mis, TURNI SO allineato e <3 rosso, righe alte | reg-v017, reg-so-allineamento |
 | 15 | Rinforzi esterni SO (archivio separato, persistono, cancellabili) | parziale in reg-v017/reg-unit-store (unità store basic); da rafforzare |
 | 16 | Ordine automatico del personale | implicito in tutte le suite UI (i nominativi compaiono sempre ordinati); dedicato: da aggiungere |
@@ -36,7 +36,7 @@ Esecuzione di tutto: `sh test/run.sh` (vedi README.md per i prerequisiti).
 | 24 | Password del dispositivo (imposta/verifica/cambia; mai restare senza lucchetto) | reg-lock |
 | 25 | Export/import JSON | reg-unit-store |
 | 26 | Controlli statici (selettori CSS accoppiati, versione/cache, id JS↔HTML, menu causali, colore L) | reg-statico |
-| 27 | Esporta Excel SpreadsheetML (Presenze + Sala Operativa) | DA COPRIRE (v. buchi) |
+| 27 | Esporta Excel SpreadsheetML (Presenze + Sala Operativa) | reg-export-excel (XML valido, fogli Presenze/Sala Operativa, nominativi, causale L, righe conteggio, esterni SO solo con flag, backup JSON) |
 | 28 | Causale su periodo (clic nome: data inizio + n turni) | parziale (reg-v017 via menu); dedicata: da aggiungere |
 | 29 | Ordine/struttura lenzuolo (sticky header, nomi fissi, larghezza) | non自动化 (grafica: verifica umana) |
 
@@ -78,6 +78,6 @@ Esecuzione di tutto: `sh test/run.sh` (vedi README.md per i prerequisiti).
   territorio di Playwright (punto 5, da fare).
 - Supabase e' simulato con stub nelle suite sync: RLS e codice-link veri
   restano territorio del progetto di test (punto 2, da fare).
-- L'export Excel (SpreadsheetML) e' coperto solo parzialmente (struttura statica):
-  da aggiungere una suite dedicata quando si tocca esportaExcel().
-- L'ordine alfabetico/deletto del personale merita una suite dedicata dedicata.
+- L'export Excel (SpreadsheetML) e' coperto da reg-export-excel (XML valido,
+  fogli, righe, esterni SO, backup JSON).
+- L'inserimento di omonimi/doppi e' coperto da reg-omonimi.

@@ -63,6 +63,13 @@ lancia tutte le suite e stampa PASS/FAIL per ogni controllo.
   le novita' del cloud si applicano da sole (niente F5), con una finestra
   aperta o modifiche non ancora spedita si aspetta e avvisa col banner,
   cloud regredito viene unito e rispinto.
+- `reg-export-excel.js` — esporta Excel (SpreadsheetML): XML valido, fogli
+  Presenze e Sala Operativa, nominativi e causali (L) presenti, righe di
+  conteggio, esterni SO solo quando sono previsti, backup JSON valido.
+- `reg-omonimi.js` — inserimento omonimi/doppi dalla finestra personale:
+  omonimo uscito viene recuperato (nessun nuovo record, storico intatto),
+  doppione attivo viene creato con nome differente, annullamento non crea
+  nessun record.
 
 Il piano completo (inventario delle funzioni, mappa di copertura, bug storici
 trovati con questo metodo) e' in PIANO-COLLAUDI.md.

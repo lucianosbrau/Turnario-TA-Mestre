@@ -278,3 +278,9 @@ Attivato da parte dell'utente il RULESET di protezione sul ramo MAIN del repo:
 - Require status checks: il job "Collaudi automatici" (CI) DEVE essere verde prima del merge
 - Block force pushes + Restrict deletions
 CONSEGUENZA SUL FLUSSO DI LAVORO: da ora in poi la procedura di rilascio è SOLO "branch -> PR -> CI verde -> gh pr merge" (il vecchio "merge locale + push su main" viene RESPINTO da GitHub). Il semaforo dei collaudi è vincolante.
+
+## DUE SUITE MINORI (22/12 — solo collaudi: NESSUNA modifica all app, APP_VERSION resta 1.5.0)
+
+- `test/reg-export-excel.js` (14 asserzioni PASS): l'export Excel produce XML SpreadsheetML valido con i fogli Presenze e Sala Operativa, nominativi e causali (L) presenti, righe di conteggio, esterni SO solo quando previsti; il backup JSON resta valido.
+- `test/reg-omonimi.js` (PASS): dalla finestra personale un omonimo gia' uscito viene RECUPERATO (nessun nuovo record, storico causali intatto); un doppione ATTIVO viene inserito solo con nome differente (es. VERDI GIANNI); l'annullamento non crea nessun record.
+- Le due voci del piano di collaudo (#13 omonimi, #27 export Excel) passano da "da coprire" a coperte; run.sh esegue ora 26 suite (+ e2e in CI, + online a richiesta).
