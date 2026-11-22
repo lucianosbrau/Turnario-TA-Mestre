@@ -40,6 +40,14 @@ for t in reg-avvio-sync reg-merge-collaborativo reg-sync-live reg-motore reg-uni
 done
 if [ "$FAIL" = "0" ]; then echo "== TUTTE LE SUITE PASSATE"; else echo "== ALMENO UNA SUITE FALLITA"; fi
 
+# --e2e: collaudi su BROWSER REALE (Playwright + Chromium + service worker)
+if [ "$1" = "--e2e" ] || [ "$2" = "--e2e" ]; then
+  echo "== e2e browser reale (playwright)"
+  node "$REPO/test/e2e/reg-e2e.mjs"
+  rc=$?
+  if [ "$rc" -ne 0 ]; then echo "== e2e USCITA CON CODICE $rc"; FAIL=1; fi
+fi
+
 # --coverage: percentuale di righe eseguite sul codice critico (c8 + NODE_V8_COVERAGE)
 if [ "$1" = "--coverage" ]; then
   if command -v c8 >/dev/null 2>&1 || [ -x "$REPO/node_modules/.bin/c8" ]; then
