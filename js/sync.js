@@ -201,7 +201,7 @@ export function programmaPush(runLocalmente, leggiStato) {
         const rem = await scarica();
         const tRem = (rem && rem.aggiornato_al + "" || "").slice(0, 23);
         const statoLoc = leggiStato();
-        const tVisto = (statoLoc && statoLoc.__cloudVisto + "" || "").slice(0, 23);
+        const tVisto = (statoLoc && statoLoc.__cloudVisto ? String(statoLoc.__cloudVisto) : "").slice(0, 23);
         if (rem && rem.stato && Array.isArray(rem.stato.personale) && rem.stato.personale.length > 0
             && tVisto && tRem !== tVisto) {
           const unito = unisciStato(statoLoc, rem.stato);
@@ -258,8 +258,8 @@ async function controlloLive() {
     const tRem = (rem.aggiornato_al + "").slice(0, 23);
     const locale = statoLocaleCb ? statoLocaleCb() : null;
     if (!locale) return;
-    const tVisto = ((locale && locale.__cloudVisto) + "" || "").slice(0, 23);
-    const tMut = ((locale && locale.__aggiornatoAl) + "" || "").slice(0, 23);
+    const tVisto = (locale && locale.__cloudVisto ? String(locale.__cloudVisto) : "").slice(0, 23);
+    const tMut = (locale && locale.__aggiornatoAl ? String(locale.__aggiornatoAl) : "").slice(0, 23);
     if (tRem === tVisto) return;                 // nessuna novita'
     if (!tVisto) { visto(rem.aggiornato_al); return; }  // avvio non ancora completato
     const occupato = busyCb ? busyCb() : false;
@@ -340,9 +340,10 @@ async function avvioInterno(applicaStato, statoLocale, seedVergine) {
 //    l'archivio precedente resta nello storico delle copie di sicurezza
 async function sincronizza(rem, applicaStato, statoLocale) {
   const locale = statoLocale();
-  const tVisto = ((locale && locale.__cloudVisto) + "" || "").slice(0, 23);
-  const tMut = ((locale && locale.__aggiornatoAl) + "" || "").slice(0, 23);
-  const tRem = (rem.aggiornato_al + "").slice(0, 23);
+  // NB: campo assente => "" (MAI la stringa "undefined": confronti falsati)
+  const tVisto = (locale && locale.__cloudVisto ? String(locale.__cloudVisto) : "").slice(0, 23);
+  const tMut = (locale && locale.__aggiornatoAl ? String(locale.__aggiornatoAl) : "").slice(0, 23);
+  const tRem = (rem.aggiornato_al ? String(rem.aggiornato_al) : "").slice(0, 23);
   if (!tVisto) {
     // prima sincronizzazione con il nuovo schema. Se ci sono modifiche locali
     // GIA' FATTE e mai spedita (es. compilate offline durante un aggiornamento

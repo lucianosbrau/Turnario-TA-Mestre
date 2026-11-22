@@ -99,6 +99,27 @@ const causaliUnit = ultimaScrittura && ultimaScrittura.causali[2027] || [];
 ok(causaliUnit.some(c => c.p === 'A' && c.d === '2027-05-05' && c.c === 'SO') && causaliUnit.some(c => c.p === 'B' && c.d === '2027-05-06' && c.c === 'L'),
   'S3B-c causali di entrambi i lati fuse nel cloud');
 
+// S6 (regressione BUG browser-e2e 2025-12): archivio SENZA __cloudVisto e SENZA
+// __aggiornatoAl (archivi ante-v1.2.0): i campi assenti NON devono diventare la
+// stringa "undefined" (falsava i confronti e spingeva il locale sopra il cloud)
+await scenario('S6 archivio senza timbri tecnici: il cloud viene APPLICATO (migrazione), nessun push',
+  CLOUD_OK, { persone: [{ id: 'VECCHIO' }] }, false, 'cloud');
+ok(ultimaScrittura === null || ultimaScrittura.personale.some(p => p.id === 'LAVORO'),
+   'S6b il locale NON e stato spinto sopra il cloud buono');
+// S6b: __cloudVisto presente ma __aggiornatoAl assente, cloud piu' recente del visto
+applicatoCorrente = null; ultimaScrittura = null;
+rispostaCloud = { stato: { personale: [{ id: 'NUOVO_S6b' }] }, aggiornato_al: '2027-08-01T00:00:00.000Z' };
+await (async () => {
+  await sync.avvio(applica, () => ({
+    personale: [{ id: 'MIO' }],
+    causali: {},
+    __cloudVisto: '2027-07-01T00:00:00.000Z',   // presente
+    // __aggiornatoAl assente: non deve diventare "undefined"
+  }), () => false);
+  ok(!!globalThis.__applicato, 'S6c campo __aggiornatoAl assente: il cloud piu\' recente si applica comunque');
+  ok(ultimaScrittura === null, 'S6d nessun push errato del locale');
+})();
+
 // S4: cloud vuoto => il locale viene pushato
 await scenario('S4 cloud vuoto: il locale viene pubblicato', null,
   { persone: [{ id: 'MIO' }], __aggiornatoAl: '2027-07-01T00:00:00.000Z', __cloudVisto: '2027-07-01T10:00:00.000Z' }, false, 'push');
