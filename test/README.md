@@ -94,3 +94,12 @@ rete (context.route): NESSUNA query al database reale.
 Esecuzione: `node test/e2e/reg-e2e.mjs` (serve `npm i -D playwright` e
 `npx playwright install chromium`; senza Playwright la suite SKIPPA con
 codice 0). In CI gira a ogni push/PR (passo "Browser reale").
+
+## Collaudi database REALE (punto 2, solo a richiesta)
+
+`test/reg-supabase-online.mjs` — gira CONTRO il Supabase di produzione ma tocca
+SOLO la riga del codice di collaudo (TEST-COLLAUDI-TURNARIO-000001): codice
+inesistente non legge né scrive, scrittura con codice fantasma rifiutata,
+riga di test scrive/ rilegge correttamente, tabella non leggibile dal browser
+(RLS), archivio vero incontaminato (solo forma). Esecuzione:
+`sh test/run.sh --online` — NON in CI, per non consumare quota.
