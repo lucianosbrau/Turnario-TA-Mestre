@@ -69,7 +69,8 @@ async function nuovoPC(nome) {
     return route.fulfill({ json: true });
   });
   await context.route('**/turnario_log', (route) => route.fulfill({ json: {} }));
-  await context.route('**supabase.co**', (route) => route.fulfill({ json: {} }));
+  // NB: nessuna regola generica: le route piu' recenti hanno precedenza in
+  // Playwright e una regola '**supabase.co**' OScurava quelle delle RPC.
   const page = await context.newPage();
   const errori = [];
   page.on('pageerror', (e) => errori.push(String(e)));
