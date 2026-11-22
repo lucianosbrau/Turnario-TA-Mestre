@@ -28,11 +28,15 @@ echo "== build bundle"
 FAIL=0
 for t in reg-v017 reg-seed-safe reg-push-normale reg-storico reg-cancellazione reg-so-allineamento reg-statico reg-conteggi-soglie; do
   echo "== $t"
-  node "$REPO/test/$t.js" || FAIL=1
+  node "$REPO/test/$t.js"
+  rc=$?
+  if [ "$rc" -ne 0 ]; then echo "== $t USCITA CON CODICE $rc"; FAIL=1; fi
 done
 for t in reg-avvio-sync reg-merge-collaborativo reg-sync-live reg-motore reg-unit-store reg-lock reg-disastro reg-oggi reg-errorlog; do
   echo "== $t"
-  node "$REPO/test/$t.mjs" || FAIL=1
+  node "$REPO/test/$t.mjs"
+  rc=$?
+  if [ "$rc" -ne 0 ]; then echo "== $t USCITA CON CODICE $rc"; FAIL=1; fi
 done
 if [ "$FAIL" = "0" ]; then echo "== TUTTE LE SUITE PASSATE"; else echo "== ALMENO UNA SUITE FALLITA"; fi
 
