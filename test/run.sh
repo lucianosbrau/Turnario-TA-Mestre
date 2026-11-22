@@ -26,7 +26,7 @@ echo "== build bundle"
 "$ESB" "$REPO/js/errorlog.js" --bundle --format=esm --outfile="/tmp/turnario-errorlog-bundle.mjs" || exit 1
 
 FAIL=0
-for t in reg-v017 reg-seed-safe reg-push-normale reg-storico reg-cancellazione reg-so-allineamento reg-statico reg-conteggi-soglie; do
+for t in reg-v017 reg-seed-safe reg-push-normale reg-storico reg-cancellazione reg-so-allineamento reg-statico reg-conteggi-soglie reg-export-excel reg-omonimi; do
   echo "== $t"
   node "$REPO/test/$t.js"
   rc=$?
