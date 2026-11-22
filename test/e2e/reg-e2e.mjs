@@ -145,7 +145,7 @@ try {
   await pcA.page.reload();
   await sbloccaEPrendiPassword(pcA.page);
   const offlineOk = await pcA.page.locator('#tabella-personale tbody tr').count();
-  ok(offlineOk >= 1, '(E4) OFFLINE: l'app si apre dal service worker/cache senza rete');
+  ok(offlineOk >= 1, "(E4) OFFLINE: l'app si apre dal service worker/cache senza rete");
   // compila una causale R da offline
   await apriPresenze(pcA.page);
   await pcA.page.locator('[data-cella="p2|2027-03-04"]').first().click();
