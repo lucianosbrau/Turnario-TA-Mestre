@@ -270,3 +270,11 @@ Prove eseguite da agente contro il progetto di PRODUZIONE (6 chiamate, nessun da
 4. `turnario_scrivi` con CODICE NUOVO di test → risposta FALSE, nessuna riga creata: le funzioni NON permettono di creare righe via API (ottimo per sicurezza; la riga di test va creata da SQL del proprietario)
 5. `turnario_leggi` codice vero dopo la prova di scrittura → invariato
 AL NOTE: l'insert della riga di TEST fallito con duplicate key (id)=(1): la tabella ha id seriale PK quasi mai incrementato dallo script originale (riga vera creata con id fisso). Cura: setval di pg_get_serial_sequence + insert con on conflict do nothing. Codice di TEST: TEST-COLLAUDI-TURNARIO-000001 (riga separata; le funzioni non permettono a un codice di toccare la riga di un altro)
+
+## LUCCHETTO MAIN ATTIVATO (registrazione software, 22/12)
+
+Attivato da parte dell'utente il RULESET di protezione sul ramo MAIN del repo:
+- Require a pull request before merging (nessuna approvazione richiesta)
+- Require status checks: il job "Collaudi automatici" (CI) DEVE essere verde prima del merge
+- Block force pushes + Restrict deletions
+CONSEGUENZA SUL FLUSSO DI LAVORO: da ora in poi la procedura di rilascio è SOLO "branch -> PR -> CI verde -> gh pr merge" (il vecchio "merge locale + push su main" viene RESPINTO da GitHub). Il semaforo dei collaudi è vincolante.
