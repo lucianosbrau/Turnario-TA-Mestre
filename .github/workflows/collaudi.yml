@@ -19,3 +19,8 @@ jobs:
         run: sh test/run.sh
       - name: Copertura del codice critico (sync, store, engine, lock)
         run: sh test/run.sh --coverage
+      - name: Browser reale (Playwright + Chromium + service worker)
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          sh test/run.sh --e2e
