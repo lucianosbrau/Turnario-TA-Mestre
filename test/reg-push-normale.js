@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
-const html = fs.readFileSync('/workspace/github__lucianosbrau__Turnario-TA-Mestre/index.html', 'utf8');
+const path = require('path');
+const html = fs.readFileSync(process.env.TURNARIO_REPO ? process.env.TURNARIO_REPO + '/index.html' : path.resolve(__dirname, '../index.html'), 'utf8');
 const dom = new JSDOM(html, { url: "https://lucianosbrau.github.io/Turnario-TA-Mestre/?k=CODICETESTCODICETEST1234", runScripts: 'outside-only' });
 const { window } = dom;
 window.HTMLElement.prototype.scrollIntoView = () => {};
