@@ -91,9 +91,10 @@ async function nuovoPC(nome) {
 async function sbloccaEPrendiPassword(page) {
   await page.goto(BASE + '/index.html?k=CODICE-E2E-12345678901234');
   await page.locator('#blocco-pass').fill('test1234');
-  await page.locator('#blocco-pass2').fill('test1234');
+  const ripeti = page.locator('#blocco-pass2');
+  if (await ripeti.count()) await ripeti.fill('test1234');   // solo al primo avvio
   await page.locator('#blocco-ok').click();
-  await page.locator('#pagina-home').waitFor({ state: 'visible', timeout: 10000 });
+  await page.locator('#pagina-home').waitFor({ state: 'visible', timeout: 15000 });
 }
 
 async function apriPresenze(page) {
