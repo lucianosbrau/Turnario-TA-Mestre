@@ -102,7 +102,11 @@ try {
   const badge = await pcA.page.locator('#badge-sync').textContent();
   ok(badge.includes('Sincronizzato'), '(E1) PC-A vergine sincronizza col cloud al primo avvio: "' + badge + '"');
   const badgeTitle = await pcA.page.locator('#badge-sync').getAttribute('title');
-  console.log('   [diag] leggi=' + diagnostica.leggi + ' scrivi=' + diagnostica.scrivi + ' richiesteSupabase=' + JSON.stringify(diagnostica.richieste) + ' badgeTitle="' + badgeTitle + '"');
+  const locali = await pcA.page.evaluate(() => {
+    const st = JSON.parse(localStorage.getItem('turnario-ta-v1'));
+    return { persone: (st.personale || []).map(p => p.cognome), visto: st.__cloudVisto, mut: st.__aggiornatoAl };
+  });
+  console.log('   [diag] leggi=' + diagnostica.leggi + ' scrivi=' + diagnostica.scrivi + ' scritti=' + JSON.stringify(scrittureCloud.map(s => (s.personale || []).map(p => p.cognome))) + ' locali=' + JSON.stringify(locali) + ' badgeTitle="' + badgeTitle + '"');
   const righeHome = await pcA.page.locator('#tabella-personale tbody tr').count();
   ok(righeHome === 2, '(E1b) il seed NON ha vinto: le 2 persone del cloud sono in Home');
 
