@@ -47,7 +47,7 @@ let cloud = {
   aggiornato_al: '2027-01-20T10:00:00.000Z',
 };
 let scrittureCloud = [];
-const diagnostica = { leggi: 0, scrivi: 0, fallite: [], console: [] };
+const diagnostica = { leggi: 0, scrivi: 0, fallite: [], console: [], richieste: [] };
 
 async function nuovoPC(nome) {
   const context = await browser.newContext();
@@ -74,6 +74,7 @@ async function nuovoPC(nome) {
   const errori = [];
   page.on('pageerror', (e) => errori.push(String(e)));
   page.on('requestfailed', (r) => diagnostica.fallite.push(r.url() + ' :: ' + (r.failure() || {}).errorText));
+  page.on('request', (r) => { if (r.url().includes('supabase')) diagnostica.richieste.push(r.method() + ' ' + r.url()); });
   page.on('console', (m) => { if (m.type() === 'error') diagnostica.console.push(m.text()); });
   return { context, page, errori };
 }
@@ -99,7 +100,8 @@ try {
   await sleep(2000);
   const badge = await pcA.page.locator('#badge-sync').textContent();
   ok(badge.includes('Sincronizzato'), '(E1) PC-A vergine sincronizza col cloud al primo avvio: "' + badge + '"');
-  console.log('   [diag] leggi=' + diagnostica.leggi + ' scrivi=' + diagnostica.scrivi + ' fallite=' + JSON.stringify(diagnostica.fallite) + ' console=' + JSON.stringify(diagnostica.console));
+  const badgeTitle = await pcA.page.locator('#badge-sync').getAttribute('title');
+  console.log('   [diag] leggi=' + diagnostica.leggi + ' scrivi=' + diagnostica.scrivi + ' richiesteSupabase=' + JSON.stringify(diagnostica.richieste) + ' badgeTitle="' + badgeTitle + '"');
   const righeHome = await pcA.page.locator('#tabella-personale tbody tr').count();
   ok(righeHome === 2, '(E1b) il seed NON ha vinto: le 2 persone del cloud sono in Home');
 
