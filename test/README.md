@@ -80,3 +80,17 @@ viene pubblicata nel log: se una suite fallisce la check diventa rossa
 - Stub di alert/confirm/prompt/scrollIntoView; localStorage pre-popolato.
 - Sblocco password del dispositivo con `test1234`.
 - Le suite lanciano `process.exit(1)` se un controllo fallisce.
+
+## Collaudi su browser reale (Playwright, punto 5)
+
+`test/e2e/reg-e2e.mjs` — Chromium vero con service worker vero:
+(E1) PC vergine: il cloud ha la meglio sul seed al primo avvio; (E2) il service
+worker controlla la pagina; (E3) colori COMPUTATI dalle celle (verde #3fd14f,
+bordo 2px, niente celle rosa); (E4) OFFLINE vero: l'app si apre dal SW/cache,
+una causale compilata offline arriva al cloud al rientro; (E5) due contesti
+(due PC) contro lo stesso cloud: le causali si propagano senza perdite;
+(E6) nessun errore JS. Le chiamate Supabase sono intercettate a livello di
+rete (context.route): NESSUNA query al database reale.
+Esecuzione: `node test/e2e/reg-e2e.mjs` (serve `npm i -D playwright` e
+`npx playwright install chromium`; senza Playwright la suite SKIPPA con
+codice 0). In CI gira a ogni push/PR (passo "Browser reale").
