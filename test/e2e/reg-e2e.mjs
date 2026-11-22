@@ -55,6 +55,14 @@ async function nuovoPC(nome) {
   await context.addInitScript(([statoSeed]) => {
     // il PC "vergine" parte dal seed: il cloud dovra' avere la meglio
     localStorage.setItem('turnario-ta-v1', JSON.stringify(statoSeed));
+    const fOriginale = window.fetch.bind(window);
+    window.fetch = async (url, opts) => {
+      console.log('[FETCH] ' + (opts && opts.method || 'GET') + ' ' + url + ' :: ' + (opts && opts.body ? String(opts.body).slice(0, 80) : ''));
+      const r = await fOriginale(url, opts);
+      const clone = r.clone();
+      clone.json().then(j => console.log('[FETCH->] ' + String(url).split('/').pop() + ' :: ' + JSON.stringify(j).slice(0, 120))).catch(() => {});
+      return r;
+    };
   }, [{
     personale: [persona('s1', 'SEED-' + nome)],
     causali: {}, soRinforzi: [], rpStorico: [], exceptions: [], settings: { anno: 2027 },
@@ -76,7 +84,7 @@ async function nuovoPC(nome) {
   page.on('pageerror', (e) => errori.push(String(e)));
   page.on('requestfailed', (r) => diagnostica.fallite.push(r.url() + ' :: ' + (r.failure() || {}).errorText));
   page.on('request', (r) => { if (r.url().includes('supabase')) diagnostica.richieste.push(r.method() + ' ' + r.url()); });
-  page.on('console', (m) => { if (m.type() === 'error') diagnostica.console.push(m.text()); });
+  page.on('console', (m) => { if (m.text().includes('FETCH') || m.type() === 'error') diagnostica.console.push(m.text()); });
   return { context, page, errori };
 }
 
@@ -107,6 +115,7 @@ try {
     return { persone: (st.personale || []).map(p => p.cognome), visto: st.__cloudVisto, mut: st.__aggiornatoAl };
   });
   console.log('   [diag] leggi=' + diagnostica.leggi + ' scrivi=' + diagnostica.scrivi + ' scritti=' + JSON.stringify(scrittureCloud.map(s => (s.personale || []).map(p => p.cognome))) + ' locali=' + JSON.stringify(locali) + ' badgeTitle="' + badgeTitle + '"');
+  console.log('   [console] ' + diagnostica.console.slice(0, 12).join('\n   [console] '));
   const righeHome = await pcA.page.locator('#tabella-personale tbody tr').count();
   ok(righeHome === 2, '(E1b) il seed NON ha vinto: le 2 persone del cloud sono in Home');
 
