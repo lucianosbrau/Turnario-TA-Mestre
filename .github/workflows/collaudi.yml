@@ -21,6 +21,6 @@ jobs:
         run: sh test/run.sh --coverage
       - name: Browser reale (Playwright + Chromium + service worker)
         run: |
-          npm install --no-save playwright
+          npm install --no-save esbuild jsdom c8 playwright
           npx playwright install --with-deps chromium
-          sh test/run.sh --e2e
+          node test/e2e/reg-e2e.mjs
