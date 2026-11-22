@@ -32,6 +32,8 @@ globalThis.fetch = async (url, opts) => {
 
 // io (Presenze) ho una causale L locale
 let locale = {
+  __cloudVisto: '2027-06-01T10:00:00.000Z',   // gia' sincronizzato col cloud iniziale
+  __aggiornatoAl: '2027-06-01T11:00:00.000Z', // e con una modifica locale valida
   personale: [{ id: 'OP', cognome: 'VERDI', nome: 'Y', spec: { SO115: 'Si' }, grado: 'CS', rp: 'A2' }],
   causali: { 2027: [{ p: 'OP', d: '2027-06-05', c: 'L' }] },
   soRinforzi: [],

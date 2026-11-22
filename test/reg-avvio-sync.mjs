@@ -107,7 +107,7 @@ await scenario('S6 archivio senza timbri tecnici: il cloud viene APPLICATO (migr
 ok(ultimaScrittura === null || ultimaScrittura.personale.some(p => p.id === 'LAVORO'),
    'S6b il locale NON e stato spinto sopra il cloud buono');
 // S6b: __cloudVisto presente ma __aggiornatoAl assente, cloud piu' recente del visto
-applicatoCorrente = null; ultimaScrittura = null;
+globalThis.__applicato = null; ultimaScrittura = null;
 rispostaCloud = { stato: { personale: [{ id: 'NUOVO_S6b' }] }, aggiornato_al: '2027-08-01T00:00:00.000Z' };
 await (async () => {
   await sync.avvio(applica, () => ({
