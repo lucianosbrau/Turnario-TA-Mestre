@@ -47,6 +47,7 @@ let cloud = {
   aggiornato_al: '2027-01-20T10:00:00.000Z',
 };
 let scrittureCloud = [];
+const diagnostica = { leggi: 0, scrivi: 0, fallite: [], console: [] };
 
 async function nuovoPC(nome) {
   const context = await browser.newContext();
@@ -59,8 +60,9 @@ async function nuovoPC(nome) {
     causali: {}, soRinforzi: [], rpStorico: [], exceptions: [], settings: { anno: 2027 },
   }]);
   // intercettazione di rete: le chiamate a Supabase non lasciano il collaudo
-  await context.route('**/rpc/turnario_leggi', (route) => route.fulfill({ json: cloud }));
+  await context.route('**/rpc/turnario_leggi', (route) => { diagnostica.leggi++; return route.fulfill({ json: cloud }); });
   await context.route('**/rpc/turnario_scrivi', (route) => {
+    diagnostica.scrivi++;
     const p = JSON.parse(route.request().postData());
     scrittureCloud.push(p.p_stato);
     cloud = { stato: p.p_stato, aggiornato_al: new Date().toISOString() };
@@ -71,6 +73,8 @@ async function nuovoPC(nome) {
   const page = await context.newPage();
   const errori = [];
   page.on('pageerror', (e) => errori.push(String(e)));
+  page.on('requestfailed', (r) => diagnostica.fallite.push(r.url() + ' :: ' + (r.failure() || {}).errorText));
+  page.on('console', (m) => { if (m.type() === 'error') diagnostica.console.push(m.text()); });
   return { context, page, errori };
 }
 
@@ -92,8 +96,10 @@ try {
   // ---------- E1: apertura, password, arrivo del cloud sul PC vergine
   const pcA = await nuovoPC('A');
   await sbloccaEPrendiPassword(pcA.page);
+  await sleep(2000);
   const badge = await pcA.page.locator('#badge-sync').textContent();
   ok(badge.includes('Sincronizzato'), '(E1) PC-A vergine sincronizza col cloud al primo avvio: "' + badge + '"');
+  console.log('   [diag] leggi=' + diagnostica.leggi + ' scrivi=' + diagnostica.scrivi + ' fallite=' + JSON.stringify(diagnostica.fallite) + ' console=' + JSON.stringify(diagnostica.console));
   const righeHome = await pcA.page.locator('#tabella-personale tbody tr').count();
   ok(righeHome === 2, '(E1b) il seed NON ha vinto: le 2 persone del cloud sono in Home');
 
