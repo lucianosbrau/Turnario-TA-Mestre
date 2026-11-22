@@ -40,6 +40,15 @@ for t in reg-avvio-sync reg-merge-collaborativo reg-sync-live reg-motore reg-uni
 done
 if [ "$FAIL" = "0" ]; then echo "== TUTTE LE SUITE PASSATE"; else echo "== ALMENO UNA SUITE FALLITA"; fi
 
+# --online: collaudi DATABASE REALE (solo riga di TEST, A RICHIESTA, non in CI)
+if [ "$1" = "--online" ] || [ "$2" = "--online" ]; then
+  echo "== database reale (riga di test)"
+  "$ESB" "$REPO/js/config.js" --bundle --format=esm --outfile="/tmp/turnario-config-bundle.mjs" || exit 1
+  CONFIG_BUNDLE="/tmp/turnario-config-bundle.mjs" node "$REPO/test/reg-supabase-online.mjs"
+  rc=$?
+  if [ "$rc" -ne 0 ]; then echo "== online USCITA CON CODICE $rc"; FAIL=1; fi
+fi
+
 # --e2e: collaudi su BROWSER REALE (Playwright + Chromium + service worker)
 if [ "$1" = "--e2e" ] || [ "$2" = "--e2e" ]; then
   echo "== e2e browser reale (playwright)"
